@@ -15,6 +15,7 @@ def test():
     return "APP IS WORKING"
 
 @app.route("/chat", methods=["POST"])
+@app.route("/chat", methods=["POST"])
 def chat():
     user_msg = request.json.get("message")
 
@@ -28,7 +29,7 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "openai/gpt-3.5-turbo"
+                "model": "openai/gpt-4o-mini",
                 "messages": [
                     {"role": "system", "content": "Reply in simple Hindi-English mix."},
                     {"role": "user", "content": user_msg}
@@ -37,30 +38,33 @@ def chat():
             timeout=30
         )
 
-       data = res.json()
+        data = res.json()
 
-if res.status_code != 200:
-    print("OPENROUTER ERROR:", data)
-    return jsonify({
-        "reply": "AI service error. API key / credits / model issue."
-    }), 500
+        # 🔴 IMPORTANT SAFETY CHECKS
+        if res.status_code != 200:
+            print("OPENROUTER ERROR:", data)
+            return jsonify({
+                "reply": "AI service issue (API key / credits / model)."
+            }), 500
 
-if "choices" not in data:
-    print("INVALID RESPONSE:", data)
-    return jsonify({
-        "reply": "Invalid AI response received."
-    }), 500
+        if "choices" not in data:
+            print("INVALID RESPONSE:", data)
+            return jsonify({
+                "reply": "AI response invalid. Please try again."
+            }), 500
 
-return jsonify({
-    "reply": data["choices"][0]["message"]["content"]
-})
-
+        return jsonify({
+            "reply": data["choices"][0]["message"]["content"]
+        })
 
     except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"reply": "Server error, please try again"}), 500
+        print("SERVER ERROR:", e)
+        return jsonify({
+            "reply": "Server error, please try again"
+        }), 500
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
