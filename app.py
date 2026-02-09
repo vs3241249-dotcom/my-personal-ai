@@ -1,118 +1,92 @@
 from flask import Flask, render_template, request, jsonify
-import requests
-import os
-from datetime import datetime
-from zoneinfo import ZoneInfo
-import json
+import requests, os, sqlite3, datetime
 
 app = Flask(__name__)
-
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-# =========================
-# FILE FOR PERMANENT STORAGE
-# =========================
-ADMIN_FILE = "admin_messages.json"
+DB = "chats.db"
 
+def init_db():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS chats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ip TEXT,
+        role TEXT,
+        message TEXT,
+        timestamp TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
 
-def load_admin_messages():
-    if not os.path.exists(ADMIN_FILE):
-        return []
-    with open(ADMIN_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_admin_messages(messages):
-    with open(ADMIN_FILE, "w", encoding="utf-8") as f:
-        json.dump(messages, f, indent=2, ensure_ascii=False)
-
-
-# load messages at app start
-admin_messages = load_admin_messages()
-
+init_db()
 
 @app.route("/")
 def home():
     return render_template("inbox.html")
 
-
-@app.route("/test")
-def test():
-    return "APP IS WORKING"
-
-
-# =========================
-# CHAT ROUTE
-# =========================
 @app.route("/chat", methods=["POST"])
 def chat():
+    user_msg = request.json.get("message")
+    user_ip = request.remote_addr
+    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+
     try:
-        data_req = request.get_json()
+        # Save user message
+        c.execute("INSERT INTO chats (ip, role, message, timestamp) VALUES (?, ?, ?, ?)",
+                  (user_ip, "user", user_msg, time))
+        conn.commit()
 
-        if not data_req:
-            return jsonify({"reply": "Invalid data"}), 400
-
-        user_msg = data_req.get("message", "").strip()
-        user_name = data_req.get("name", "Unknown User")
-
-        if not user_msg:
-            return jsonify({"reply": "Empty message"}), 400
-
-        # ---- TIME (DO NOT CHANGE) ----
-        ist = ZoneInfo("Asia/Kolkata")
-        time_now = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
-
-        # ---- SAVE MESSAGE PERMANENTLY ----
-        messages = load_admin_messages()
-
-        messages.append({
-            "name": user_name,
-            "message": user_msg,
-            "time": time_now
-        })
-
-        save_admin_messages(messages)
-
-        # ---- AI REQUEST ----
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://my-personal-ai-v6w9.onrender.com",
                 "X-Title": "My Personal AI"
             },
             json={
                 "model": "openai/gpt-4o-mini",
                 "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a friendly, smart AI assistant. Keep replies short and clear."
-                    },
+                    {"role": "system", "content": "Reply in simple Hindi-English mix."},
                     {"role": "user", "content": user_msg}
                 ]
             },
             timeout=30
         )
 
-        data = res.json()
+        reply = res.json()["choices"][0]["message"]["content"]
 
-        return jsonify({
-            "reply": data["choices"][0]["message"]["content"]
-        })
+        # Save bot reply
+        c.execute("INSERT INTO chats (ip, role, message, timestamp) VALUES (?, ?, ?, ?)",
+                  (user_ip, "bot", reply, time))
+        conn.commit()
+
+        return jsonify({"reply": reply})
 
     except Exception as e:
-        print("SERVER ERROR:", e)
-        return jsonify({"reply": "Server error"}), 500
+        print("ERROR:", e)
+        return jsonify({"reply": "Server error, thoda baad try karo"}), 500
+
+    finally:
+        conn.close()
 
 
-# =========================
-# ADMIN PANEL
-# =========================
+# ✅ ADMIN API (Permanent History)
 @app.route("/admin")
-def admin_panel():
-    return jsonify(load_admin_messages())
+def admin():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("SELECT ip, role, message, timestamp FROM chats ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    data = [
+        {"ip": r[0], "role": r[1], "message": r[2], "time": r[3]}
+        for r in rows
+    ]
+    return jsonify(data)
