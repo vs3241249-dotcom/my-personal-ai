@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 # 🔑 OpenRouter API Key
-OPENROUTER_API_KEY = "OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 @app.route("/")
 def home():
@@ -53,6 +53,7 @@ def chat():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
+
 
 
