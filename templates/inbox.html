@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- OWNERSHIP META (PROOF) -->
-  <meta name="author" content="Rohit">
-  <meta name="developer" content="Rohit - My Personal AI Platform">
+  <meta name="author" content="vaibhav">
+  <meta name="developer" content="vaibhav - My Personal AI Platform">
 
   <title>My Personal AI</title>
   <link rel="stylesheet" href="/static/style.css" />
@@ -64,8 +64,9 @@
 
 <!-- FOOTER (OWNERSHIP VISIBLE PROOF) -->
 <footer class="site-footer">
-  © 2026 | Developed & Owned by <strong>Rohit</strong>
+  © <span id="year"></span> | Developed & Owned by <strong>Vaibhav</strong>
 </footer>
+
 
 <!-- JS -->
 <script>
@@ -76,6 +77,9 @@
     sidebar.classList.toggle("open");
     overlay.classList.toggle("show");
   }
+</script>
+  <script>
+  document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 
 <script src="/static/script.js"></script>
