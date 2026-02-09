@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import requests
 import os
 from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 
@@ -34,11 +35,13 @@ def chat():
             return jsonify({"reply": "Empty message"}), 400
 
         # ✅ SAVE MESSAGE FOR ADMIN
-        admin_messages.append({
-            "name": user_name,
-            "message": user_msg,
-            "time": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        })
+       ist = pytz.timezone("Asia/Kolkata")
+
+admin_messages.append({
+    "name": user_name,
+    "message": user_msg,
+    "time": datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
+})
 
         # 🤖 SEND TO OPENROUTER
         res = requests.post(
@@ -84,3 +87,4 @@ def admin_panel():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
