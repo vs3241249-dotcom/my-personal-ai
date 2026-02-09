@@ -11,17 +11,19 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 DATA_FILE = "admin_messages.json"
 
-# 🔁 Load messages from file
+# ---------- LOAD OLD MESSAGES ----------
 def load_messages():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
 
-# 💾 Save messages to file
+# ---------- SAVE MESSAGES ----------
 def save_messages(messages):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(messages, f, indent=2, ensure_ascii=False)
+        json.dump(messages, f, indent=2)
+
+admin_messages = load_messages()
 
 @app.route("/")
 def home():
@@ -31,39 +33,34 @@ def home():
 def test():
     return "APP IS WORKING"
 
-# 🧠 CHAT ROUTE
+# ---------- CHAT ----------
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
         data_req = request.get_json()
+
         if not data_req:
             return jsonify({"reply": "Invalid data"}), 400
 
         user_msg = data_req.get("message", "").strip()
-        user_name = data_req.get("name", "Guest User")
+        user_name = data_req.get("name", "Unknown User")
 
         if not user_msg:
             return jsonify({"reply": "Empty message"}), 400
 
-        # 🕒 INDIA TIME (FIXED)
+        # ✅ IST TIME (FIXED)
         ist = pytz.timezone("Asia/Kolkata")
-        now = datetime.now(ist)
+        time_now = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
 
-        # 📥 LOAD OLD MESSAGES
-        admin_messages = load_messages()
-
-        # ➕ ADD NEW MESSAGE (DATE-WISE)
+        # ✅ SAVE MESSAGE (PERMANENT)
         admin_messages.append({
-            "date": now.strftime("%d-%m-%Y"),
-            "time": now.strftime("%H:%M:%S"),
             "name": user_name,
-            "message": user_msg
+            "message": user_msg,
+            "time": time_now
         })
-
-        # 💾 SAVE BACK TO FILE
         save_messages(admin_messages)
 
-        # 🤖 SEND TO OPENROUTER
+        # ---------- AI CALL ----------
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -77,7 +74,7 @@ def chat():
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are a friendly, smart AI assistant. Keep replies short, clear and human-like 🙂"
+                        "content": "You are a friendly AI assistant."
                     },
                     {"role": "user", "content": user_msg}
                 ]
@@ -86,20 +83,19 @@ def chat():
         )
 
         data = res.json()
-        reply = data["choices"][0]["message"]["content"]
 
-        return jsonify({"reply": reply})
+        return jsonify({
+            "reply": data["choices"][0]["message"]["content"]
+        })
 
     except Exception as e:
-        print("SERVER ERROR:", e)
+        print("ERROR:", e)
         return jsonify({"reply": "Server error"}), 500
 
-
-# 🛡️ ADMIN PANEL (PERMANENT HISTORY)
+# ---------- ADMIN ----------
 @app.route("/admin")
 def admin_panel():
-    return jsonify(load_messages())
-
+    return jsonify(admin_messages)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
