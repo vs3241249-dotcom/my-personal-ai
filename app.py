@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, jsonify
-import requests, os, sqlite3, datetime
+from flask import Flask, render_template, request, jsonify, redirect, session, send_file
+import requests, os, sqlite3, datetime, csv, io
 
 app = Flask(__name__)
+app.secret_key = "supersecret123"   # change later
+
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
 DB = "chats.db"
 
@@ -37,7 +40,6 @@ def chat():
     c = conn.cursor()
 
     try:
-        # Save user message
         c.execute("INSERT INTO chats (ip, role, message, timestamp) VALUES (?, ?, ?, ?)",
                   (user_ip, "user", user_msg, time))
         conn.commit()
@@ -61,7 +63,6 @@ def chat():
 
         reply = res.json()["choices"][0]["message"]["content"]
 
-        # Save bot reply
         c.execute("INSERT INTO chats (ip, role, message, timestamp) VALUES (?, ?, ?, ?)",
                   (user_ip, "bot", reply, time))
         conn.commit()
@@ -76,17 +77,78 @@ def chat():
         conn.close()
 
 
-# ✅ ADMIN API (Permanent History)
+# ========== ADMIN SYSTEM ==========
+
+def admin_required(fn):
+    def wrapper(*args, **kwargs):
+        if not session.get("admin"):
+            return redirect("/admin/login")
+        return fn(*args, **kwargs)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        if request.form.get("password") == ADMIN_PASSWORD:
+            session["admin"] = True
+            return redirect("/admin")
+        else:
+            return render_template("admin_login.html", error="Wrong password")
+    return render_template("admin_login.html")
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin", None)
+    return redirect("/admin/login")
+
+
 @app.route("/admin")
-def admin():
+@admin_required
+def admin_panel():
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("SELECT ip, role, message, timestamp FROM chats ORDER BY id DESC LIMIT 1000")
+    rows = c.fetchall()
+    conn.close()
+
+    return render_template("admin_dashboard.html", chats=rows)
+
+
+@app.route("/admin/search")
+@admin_required
+def admin_search():
+    q = request.args.get("q", "")
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("""
+    SELECT ip, role, message, timestamp FROM chats
+    WHERE message LIKE ? OR ip LIKE ?
+    ORDER BY id DESC
+    """, (f"%{q}%", f"%{q}%"))
+    rows = c.fetchall()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/admin/export")
+@admin_required
+def admin_export():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("SELECT ip, role, message, timestamp FROM chats ORDER BY id DESC")
     rows = c.fetchall()
     conn.close()
 
-    data = [
-        {"ip": r[0], "role": r[1], "message": r[2], "time": r[3]}
-        for r in rows
-    ]
-    return jsonify(data)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["IP", "Role", "Message", "Time"])
+    writer.writerows(rows)
+
+    mem = io.BytesIO()
+    mem.write(output.getvalue().encode("utf-8"))
+    mem.seek(0)
+
+    return send_file(mem, mimetype="text/csv", as_attachment=True, download_name="chat_history.csv")
