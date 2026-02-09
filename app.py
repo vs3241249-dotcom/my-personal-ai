@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 import os
+import json
 from datetime import datetime
 import pytz
 
@@ -8,8 +9,19 @@ app = Flask(__name__)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-# 🔐 ADMIN INBOX (temporary memory)
-admin_messages = []
+DATA_FILE = "admin_messages.json"
+
+# 🔁 Load messages from file
+def load_messages():
+    if not os.path.exists(DATA_FILE):
+        return []
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+# 💾 Save messages to file
+def save_messages(messages):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(messages, f, indent=2, ensure_ascii=False)
 
 @app.route("/")
 def home():
@@ -24,24 +36,32 @@ def test():
 def chat():
     try:
         data_req = request.get_json()
-
         if not data_req:
             return jsonify({"reply": "Invalid data"}), 400
 
         user_msg = data_req.get("message", "").strip()
-        user_name = data_req.get("name", "Unknown User")
+        user_name = data_req.get("name", "Guest User")
 
         if not user_msg:
             return jsonify({"reply": "Empty message"}), 400
 
-        # ✅ SAVE MESSAGE FOR ADMIN
-       ist = pytz.timezone("Asia/Kolkata")
+        # 🕒 INDIA TIME (FIXED)
+        ist = pytz.timezone("Asia/Kolkata")
+        now = datetime.now(ist)
 
-admin_messages.append({
-    "name": user_name,
-    "message": user_msg,
-    "time": datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
-})
+        # 📥 LOAD OLD MESSAGES
+        admin_messages = load_messages()
+
+        # ➕ ADD NEW MESSAGE (DATE-WISE)
+        admin_messages.append({
+            "date": now.strftime("%d-%m-%Y"),
+            "time": now.strftime("%H:%M:%S"),
+            "name": user_name,
+            "message": user_msg
+        })
+
+        # 💾 SAVE BACK TO FILE
+        save_messages(admin_messages)
 
         # 🤖 SEND TO OPENROUTER
         res = requests.post(
@@ -57,7 +77,7 @@ admin_messages.append({
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are a friendly, smart AI assistant like ChatGPT. Reply in simple, natural English. Keep answers short, clear, and human-like. Use emojis sometimes 🙂 but not too many."
+                        "content": "You are a friendly, smart AI assistant. Keep replies short, clear and human-like 🙂"
                     },
                     {"role": "user", "content": user_msg}
                 ]
@@ -66,25 +86,20 @@ admin_messages.append({
         )
 
         data = res.json()
+        reply = data["choices"][0]["message"]["content"]
 
-        if "choices" not in data:
-            return jsonify({"reply": "AI error"}), 500
-
-        return jsonify({
-            "reply": data["choices"][0]["message"]["content"]
-        })
+        return jsonify({"reply": reply})
 
     except Exception as e:
         print("SERVER ERROR:", e)
         return jsonify({"reply": "Server error"}), 500
 
 
-# 🛡️ ADMIN PANEL (MESSAGES DEKHNE KE LIYE)
+# 🛡️ ADMIN PANEL (PERMANENT HISTORY)
 @app.route("/admin")
 def admin_panel():
-    return jsonify(admin_messages)
+    return jsonify(load_messages())
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
