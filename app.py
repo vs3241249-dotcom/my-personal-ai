@@ -25,36 +25,29 @@ def chat():
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "http://localhost:5000",
-                "X-Title": "My Personal AI"
             },
             json={
-            "model": "mistralai/mistral-7b-instruct"
-
+                "model": "openai/gpt-4o-mini",
                 "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a helpful AI. Reply in very simple, easy language like ChatGPT or Gemini."
-                    },
-                    {
-                        "role": "user",
-                        "content": user_msg
-                    }
+                    {"role": "system", "content": "Reply in simple Hindi-English mix."},
+                    {"role": "user", "content": user_msg}
                 ]
-            }
+            },
+            timeout=30
         )
 
         data = res.json()
-        reply = data["choices"][0]["message"]["content"]
-        return jsonify({"reply": reply})
+        return jsonify({"reply": data["choices"][0]["message"]["content"]})
 
     except Exception as e:
-        print(e)
-        return jsonify({"reply": "⚠️ AI busy hai, thoda baad try karo"}), 500
+        print("ERROR:", e)
+        return jsonify({"reply": "Server error, please try again"}), 500
+
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
 
 
