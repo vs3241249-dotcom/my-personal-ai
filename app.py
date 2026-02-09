@@ -29,7 +29,8 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-               "model": "openai/gpt-3.5-turbo"
+            "model": "mistralai/mistral-7b-instruct"
+
                 "messages": [
                     {
                         "role": "system",
@@ -54,6 +55,7 @@ def chat():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
 
 
