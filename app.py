@@ -10,6 +10,10 @@ OPENROUTER_API_KEY = "sk-or-v1-7f88d078629b1e2f60cc40760a1668649345fe17cf88d4556
 @app.route("/")
 def home():
     return render_template("inbox.html")
+    @app.route("/test")
+def test():
+    return "APP IS WORKING"
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -50,3 +54,4 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
