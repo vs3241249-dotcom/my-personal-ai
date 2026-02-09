@@ -4,16 +4,16 @@ import os
 
 app = Flask(__name__)
 
-# 🔑 OpenRouter API Key
+# OpenRouter API Key (Render env se aayegi)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 @app.route("/")
 def home():
     return render_template("inbox.html")
-    @app.route("/test")
+
+@app.route("/test")
 def test():
     return "APP IS WORKING"
-
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -25,6 +25,7 @@ def chat():
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
+                "X-Title": "My Personal AI"
             },
             json={
                 "model": "openai/gpt-4o-mini",
@@ -41,15 +42,4 @@ def chat():
 
     except Exception as e:
         print("ERROR:", e)
-        return jsonify({"reply": "Server error, please try again"}), 500
-
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
-
-
-
-
-
-
+        return jsonify({"reply": "Server error, thoda baad try karo"}), 500
