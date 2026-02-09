@@ -15,7 +15,6 @@ def test():
     return "APP IS WORKING"
 
 @app.route("/chat", methods=["POST"])
-@app.route("/chat", methods=["POST"])
 def chat():
     user_msg = request.json.get("message")
 
@@ -39,19 +38,10 @@ def chat():
         )
 
         data = res.json()
-
-        # 🔴 IMPORTANT SAFETY CHECKS
-        if res.status_code != 200:
-            print("OPENROUTER ERROR:", data)
-            return jsonify({
-                "reply": "AI service issue (API key / credits / model)."
-            }), 500
+        print("OPENROUTER RESPONSE:", data)
 
         if "choices" not in data:
-            print("INVALID RESPONSE:", data)
-            return jsonify({
-                "reply": "AI response invalid. Please try again."
-            }), 500
+            return jsonify({"reply": str(data)}), 500
 
         return jsonify({
             "reply": data["choices"][0]["message"]["content"]
@@ -59,12 +49,12 @@ def chat():
 
     except Exception as e:
         print("SERVER ERROR:", e)
-        return jsonify({
-            "reply": "Server error, please try again"
-        }), 500
+        return jsonify({"reply": "Server error"}), 500
+
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
 
