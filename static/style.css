@@ -100,6 +100,7 @@ body.dark .sidebar {
   gap: 10px;
 }
 
+/* scrollbar hide */
 .chat::-webkit-scrollbar {
   display: none;
 }
@@ -162,7 +163,10 @@ textarea {
   display: none;
 }
 
-/* ===== MOBILE (CHATGPT STYLE) ===== */
+/* ================================================================= */
+/* ========================= MOBILE MODE =========================== */
+/* ================================================================= */
+
 @media (max-width: 768px) {
 
   .mobile-menu-btn {
@@ -197,17 +201,20 @@ textarea {
     display: block;
   }
 
+  /* --- FIXED INPUT BAR LIKE CHATGPT --- */
   .input-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     background: inherit;
-    z-index: 1200;
+    z-index: 2000;
+    padding: 10px;
   }
 
+  /* chat scroll area space for input bar */
   .chat {
-    padding-bottom: 90px;
+    padding-bottom: 120px; /* FIXED SPACE */
   }
 
   .msg {
