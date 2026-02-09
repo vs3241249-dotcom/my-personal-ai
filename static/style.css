@@ -6,9 +6,10 @@
 body {
   margin: 0;
   height: 100vh;
+  overflow: hidden;
 }
 
-/* THEMES */
+/* ===== THEMES ===== */
 body.light {
   background: #f7f7f8;
   color: #1f2937;
@@ -19,15 +20,17 @@ body.dark {
   color: #e5e7eb;
 }
 
-/* LAYOUT */
+/* ===== LAYOUT ===== */
 .app {
   display: flex;
   height: 100vh;
+  width: 100vw;
 }
 
+/* ===== SIDEBAR ===== */
 .sidebar {
   width: 260px;
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   padding: 10px;
   overflow-y: auto;
 }
@@ -66,13 +69,14 @@ body.dark .sidebar {
   color: white;
 }
 
-/* MAIN */
+/* ===== MAIN ===== */
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* ===== TOP BAR ===== */
 .top-bar {
   padding: 10px 14px;
   display: flex;
@@ -87,7 +91,7 @@ body.dark .sidebar {
   cursor: pointer;
 }
 
-/* CHAT */
+/* ===== CHAT ===== */
 .chat {
   flex: 1;
   padding: 16px;
@@ -95,6 +99,11 @@ body.dark .sidebar {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  scrollbar-width: none;
+}
+
+.chat::-webkit-scrollbar {
+  display: none;
 }
 
 .msg {
@@ -113,7 +122,7 @@ body.dark .sidebar {
 
 .msg.bot {
   align-self: flex-start;
-  background: rgba(0,0,0,0.08);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 body.dark .msg.bot {
@@ -125,7 +134,7 @@ body.dark .msg.bot {
   opacity: 0.7;
 }
 
-/* INPUT */
+/* ===== INPUT ===== */
 .input-bar {
   display: flex;
   padding: 10px;
@@ -151,167 +160,68 @@ button#send {
   cursor: pointer;
 }
 
-/* CONTEXT MENU */
-.context-menu {
-  position: absolute;
-  background: #111;
-  color: white;
-  border-radius: 8px;
+/* ===== MOBILE MENU BUTTON ===== */
+.mobile-menu-btn {
   display: none;
-  z-index: 999;
-}
-
-.context-menu div {
-  padding: 8px 12px;
   cursor: pointer;
 }
 
-.context-menu div:hover {
-  background: #2563eb;
-}
-.more-btn {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 4px;
+/* ===== OVERLAY ===== */
+.overlay {
+  display: none;
 }
 
-.msg.user .more-btn {
-  position: absolute;
-  top: 6px;
-  left: -26px;      /* 👈 bubble ke LEFT side */
-  opacity: 0;
-}
-
-.msg.bot .more-btn {
-  position: absolute;
-  top: 6px;
-  right: -26px;
-  opacity: 0;
-}
-
-
-.msg:hover .more-btn {
-  opacity: 1;
-}
-
-.chat-title .more-btn {
-  opacity: 1;
-  font-size: 16px;
-}
-
-.context-menu {
-  background: #111;
-  color: #fff;
-  border-radius: 10px;
-  min-width: 120px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.3);
-}
-/* INLINE MENU (3-dot click) */
-.inline-menu {
-  position: absolute;
-  right: 8px;
-  top: 36px;
-  background: #111;
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 10;
-  box-shadow: 0 10px 30px rgba(0,0,0,.4);
-}
-
-.inline-menu .menu-item {
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.inline-menu .menu-item:hover {
-  background: #2563eb;
-  color: white;
-}
-body {
-  overflow: hidden;   /* ⛔ NO PAGE SCROLL */
-}
-
-.chat {
-  overflow-y: auto;
-  scrollbar-width: none;        /* Firefox */
-}
-
-.chat::-webkit-scrollbar {
-  display: none;                /* Chrome */
-}
-/* Mobile fix only */
+/* ===== MOBILE (CHATGPT STYLE) ===== */
 @media (max-width: 768px) {
 
-  body {
-    zoom: 1;
-  }
-
-  .chat-container {
-    width: 100%;
+  .app {
+    width: 100vw;
     height: 100vh;
+    overflow: hidden;
   }
-
-  .sidebar {
-    width: 35%;
-    font-size: 14px;
-  }
-
-  .chat-area {
-    width: 65%;
-    font-size: 15px;
-  }
-
-  .message {
-    max-width: 85%;
-    font-size: 15px;
-  }
-
-  input, button {
-    font-size: 16px;
-  }
-}
-@media (max-width: 768px) {
 
   .mobile-menu-btn {
+    display: block;
     position: fixed;
     top: 12px;
     left: 12px;
     font-size: 26px;
-    z-index: 1002;
+    z-index: 1100;
   }
 
   .sidebar {
     position: fixed;
-    left: -100%;
+    left: -260px;
     top: 0;
-    width: 80%;
+    width: 260px;
     height: 100vh;
+    z-index: 1050;
     transition: left 0.3s ease;
-    z-index: 1001;
   }
 
   .sidebar.open {
     left: 0;
   }
 
-  .chat-area {
-    width: 100% !important;
+  .main {
+    width: 100%;
+    height: 100vh;
   }
 
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     display: none;
     z-index: 1000;
   }
 
   .overlay.show {
     display: block;
+  }
+
+  .msg {
+    max-width: 85%;
+    font-size: 15px;
   }
 }
