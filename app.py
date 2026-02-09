@@ -1,24 +1,57 @@
-from flask import Flask, render_template, request, jsonify, redirect, session, send_file
-import requests, os, datetime, json, csv, io
+from flask import Flask, render_template, request, jsonify, redirect, session
+import requests
+import os
+import sqlite3
+from datetime import datetime
+import pytz
 
 app = Flask(__name__)
-app.secret_key = "supersecret123"
+app.secret_key = "super-secret-key-change-this"
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
-DATA_FILE = "chat_logs.json"
+ADMIN_PASSWORD = "12345"   # 👈 apna strong password yahan set kar
 
-def load_logs():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+DB_FILE = "chat.db"
 
-def save_logs(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+# ---------------- DB INIT ----------------
+def init_db():
+    con = sqlite3.connect(DB_FILE)
+    cur = con.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS chats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip TEXT,
+            role TEXT,
+            message TEXT,
+            time TEXT
+        )
+    """)
+    con.commit()
+    con.close()
 
+init_db()
+
+def save_chat(ip, role, msg):
+    ist = pytz.timezone("Asia/Kolkata")
+    now = datetime.now(ist).strftime("%Y-%m-%d %H:%M:%S")
+
+    con = sqlite3.connect(DB_FILE)
+    cur = con.cursor()
+    cur.execute("INSERT INTO chats (ip, role, message, time) VALUES (?,?,?,?)",
+                (ip, role, msg, now))
+    con.commit()
+    con.close()
+
+def get_all_chats():
+    con = sqlite3.connect(DB_FILE)
+    cur = con.cursor()
+    cur.execute("SELECT ip, role, message, time FROM chats ORDER BY id DESC")
+    rows = cur.fetchall()
+    con.close()
+    return rows
+
+# ---------------- USER CHAT ----------------
 @app.route("/")
 def home():
     return render_template("inbox.html")
@@ -27,10 +60,8 @@ def home():
 def chat():
     user_msg = request.json.get("message")
     user_ip = request.remote_addr
-    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    logs = load_logs()
-    logs.append({"ip": user_ip, "role": "user", "message": user_msg, "time": time})
+    save_chat(user_ip, "user", user_msg)
 
     try:
         res = requests.post(
@@ -50,74 +81,88 @@ def chat():
             timeout=30
         )
 
-        reply = res.json()["choices"][0]["message"]["content"]
-        logs.append({"ip": user_ip, "role": "bot", "message": reply, "time": time})
-        save_logs(logs)
+        data = res.json()
+        bot_reply = data["choices"][0]["message"]["content"]
 
-        return jsonify({"reply": reply})
+        save_chat(user_ip, "bot", bot_reply)
+
+        return jsonify({"reply": bot_reply})
 
     except Exception as e:
-        print("ERROR:", e)
-        save_logs(logs)
-        return jsonify({"reply": "Server error, thoda baad try karo"}), 500
+        return jsonify({"reply": "Server error, baad me try karo"}), 500
 
 
-# ========= ADMIN SYSTEM =========
-
-def admin_required(fn):
-    def wrapper(*args, **kwargs):
-        if not session.get("admin"):
-            return redirect("/admin/login")
-        return fn(*args, **kwargs)
-    wrapper.__name__ = fn.__name__
-    return wrapper
-
-
-@app.route("/admin/login", methods=["GET", "POST"])
+# ---------------- ADMIN LOGIN ----------------
+@app.route("/admin", methods=["GET", "POST"])
 def admin_login():
+    if session.get("admin"):
+        return redirect("/admin/dashboard")
+
+    error = None
     if request.method == "POST":
-        if request.form.get("password") == ADMIN_PASSWORD:
+        pwd = request.form.get("password")
+        if pwd == ADMIN_PASSWORD:
             session["admin"] = True
-            return redirect("/admin")
+            return redirect("/admin/dashboard")
         else:
-            return render_template("admin_login.html", error="Wrong password")
-    return render_template("admin_login.html")
+            error = "Wrong password"
+
+    return render_template("admin_login.html", error=error)
+
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    if not session.get("admin"):
+        return redirect("/admin")
+
+    chats = get_all_chats()
+    return render_template("admin_dashboard.html", chats=chats)
 
 
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin", None)
-    return redirect("/admin/login")
+    return redirect("/admin")
 
 
-@app.route("/admin")
-@admin_required
-def admin_panel():
-    logs = load_logs()[::-1]   # latest first
-    return render_template("admin_dashboard.html", chats=logs)
-
-
+# ---------------- SEARCH ----------------
 @app.route("/admin/search")
-@admin_required
 def admin_search():
-    q = request.args.get("q", "").lower()
-    logs = load_logs()
-    filtered = [c for c in logs if q in c["message"].lower() or q in c["ip"]]
-    return jsonify(filtered[::-1])
+    if not session.get("admin"):
+        return jsonify([])
+
+    q = request.args.get("q", "")
+
+    con = sqlite3.connect(DB_FILE)
+    cur = con.cursor()
+    cur.execute("""
+        SELECT ip, role, message, time FROM chats
+        WHERE ip LIKE ? OR message LIKE ?
+        ORDER BY id DESC
+    """, (f"%{q}%", f"%{q}%"))
+    rows = cur.fetchall()
+    con.close()
+
+    return jsonify(rows)
 
 
+# ---------------- EXPORT ----------------
 @app.route("/admin/export")
-@admin_required
-def admin_export():
-    logs = load_logs()
+def export_csv():
+    if not session.get("admin"):
+        return redirect("/admin")
 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["IP", "Role", "Message", "Time"])
-    for c in logs:
-        writer.writerow([c["ip"], c["role"], c["message"], c["time"]])
+    chats = get_all_chats()
+    csv_data = "IP,Role,Message,Time\n"
+    for c in chats:
+        csv_data += f"{c[0]},{c[1]},{c[2].replace(',', ' ')},{c[3]}\n"
 
-    mem = io.BytesIO()
-    mem.write(output.getvalue().encode("utf-8"))
-    mem.seek(0)
-    return send_file(mem, mimetype="text/csv", as_attachment=True, download_name="chat_history.csv")
+    return csv_data, 200, {
+        "Content-Type": "text/csv",
+        "Content-Disposition": "attachment; filename=chat_history.csv"
+    }
+
+
+# ---------------- RUN ----------------
+if __name__ == "__main__":
+    app.run(debug=True)
