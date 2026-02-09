@@ -4,7 +4,6 @@ import os
 
 app = Flask(__name__)
 
-# OpenRouter API Key (Render env se aayegi)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 @app.route("/")
@@ -25,6 +24,7 @@ def chat():
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
+                "HTTP-Referer": "https://my-personal-ai-v6w9.onrender.com",
                 "X-Title": "My Personal AI"
             },
             json={
@@ -42,4 +42,8 @@ def chat():
 
     except Exception as e:
         print("ERROR:", e)
-        return jsonify({"reply": "Server error, thoda baad try karo"}), 500
+        return jsonify({"reply": "Server error, please try again"}), 500
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
