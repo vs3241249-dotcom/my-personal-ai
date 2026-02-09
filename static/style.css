@@ -231,3 +231,16 @@ body.dark .input-bar {
   background: #0b1220;
   border-top: 1px solid #1f2937;
 }
+.site-footer {
+  text-align: center;
+  padding: 8px;
+  font-size: 12px;
+  color: #aaa;
+  background: #0f0f0f;
+}
+
+@media (max-width: 768px) {
+  .site-footer {
+    font-size: 11px;
+  }
+}
