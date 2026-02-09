@@ -3,8 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- OWNERSHIP META (PROOF) -->
+  <meta name="author" content="Rohit">
+  <meta name="developer" content="Rohit - My Personal AI Platform">
+
   <title>My Personal AI</title>
   <link rel="stylesheet" href="/static/style.css" />
+
+  <!-- (OPTIONAL) Google Analytics – future use -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXX');
+  </script>
+  -->
 </head>
 
 <body class="light">
@@ -33,7 +49,7 @@
     <!-- CHAT BOX -->
     <div id="chat" class="chat"></div>
 
-    <!-- INPUT BOX (ChatGPT Style Fixed) -->
+    <!-- INPUT BOX -->
     <div class="input-bar">
       <textarea id="input" placeholder="Message My Personal AI..."></textarea>
       <button id="send">▶</button>
@@ -46,7 +62,12 @@
 
 </div>
 
-<!-- JS FILE -->
+<!-- FOOTER (OWNERSHIP VISIBLE PROOF) -->
+<footer class="site-footer">
+  © 2026 | Developed & Owned by <strong>Rohit</strong>
+</footer>
+
+<!-- JS -->
 <script>
   function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
