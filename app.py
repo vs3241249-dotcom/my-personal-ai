@@ -35,10 +35,14 @@ def chat():
             },
             json={
                 "model": "openai/gpt-4o-mini",
-                "messages": [
-                    {"role": "system", "content": "Reply in simple Hindi-English mix."},
-                    {"role": "user", "content": user_msg}
-                ]
+               "messages": [
+    {
+        "role": "system",
+        "content": "You are a friendly, smart AI assistant like ChatGPT. Reply in simple, natural English. Keep answers short, clear, and human-like. Use emojis sometimes 🙂 but not too many. Do not use unnecessary symbols or long lists. Be conversational and helpful."
+    },
+    {"role": "user", "content": user_msg}
+]
+
             },
             timeout=30
         )
@@ -60,3 +64,4 @@ def chat():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
