@@ -12,7 +12,7 @@
 <div class="app">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <span>Your Chats</span>
       <button id="newChat">+</button>
@@ -20,30 +20,42 @@
     <div id="history"></div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- MAIN AREA -->
   <main class="main">
 
     <!-- TOP BAR -->
-   <div class="top-bar">
-  <span class="mobile-menu-btn" onclick="toggleSidebar()">☰</span>
-  <span>🤖 My Personal AI</span>
-  <button id="themeToggle">🌙</button>
-</div>
+    <div class="top-bar">
+      <span class="mobile-menu-btn" onclick="toggleSidebar()">☰</span>
+      <span>🤖 My Personal AI</span>
+      <button id="themeToggle">🌙</button>
+    </div>
 
-    <!-- CHAT -->
+    <!-- CHAT BOX -->
     <div id="chat" class="chat"></div>
 
-    <!-- INPUT -->
+    <!-- INPUT BOX (ChatGPT Style Fixed) -->
     <div class="input-bar">
       <textarea id="input" placeholder="Message My Personal AI..."></textarea>
       <button id="send">▶</button>
     </div>
 
   </main>
-   <div class="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MOBILE OVERLAY -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
 </div>
 
-<!-- CONTEXT MENU -->
+<!-- JS FILE -->
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    sidebar.classList.toggle("open");
+    overlay.classList.toggle("show");
+  }
+</script>
 
 <script src="/static/script.js"></script>
 
