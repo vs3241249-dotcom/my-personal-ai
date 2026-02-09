@@ -244,3 +244,34 @@ body {
 .chat::-webkit-scrollbar {
   display: none;                /* Chrome */
 }
+/* Mobile fix only */
+@media (max-width: 768px) {
+
+  body {
+    zoom: 1;
+  }
+
+  .chat-container {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .sidebar {
+    width: 35%;
+    font-size: 14px;
+  }
+
+  .chat-area {
+    width: 65%;
+    font-size: 15px;
+  }
+
+  .message {
+    max-width: 85%;
+    font-size: 15px;
+  }
+
+  input, button {
+    font-size: 16px;
+  }
+}
