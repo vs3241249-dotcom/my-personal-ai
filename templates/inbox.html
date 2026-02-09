@@ -8,8 +8,6 @@
 </head>
 
 <body class="light">
-<div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
-<div class="overlay" onclick="toggleSidebar()"></div>
 
 <div class="app">
 
@@ -26,10 +24,11 @@
   <main class="main">
 
     <!-- TOP BAR -->
-    <div class="top-bar">
-      <span>🤖 My Personal AI</span>
-      <button id="themeToggle">🌙</button>
-    </div>
+   <div class="top-bar">
+  <span class="mobile-menu-btn" onclick="toggleSidebar()">☰</span>
+  <span>🤖 My Personal AI</span>
+  <button id="themeToggle">🌙</button>
+</div>
 
     <!-- CHAT -->
     <div id="chat" class="chat"></div>
@@ -41,6 +40,7 @@
     </div>
 
   </main>
+   <div class="overlay" onclick="toggleSidebar()"></div>
 </div>
 
 <!-- CONTEXT MENU -->
