@@ -6,6 +6,7 @@ const newChatBtn = document.getElementById("newChat");
 const themeToggle = document.getElementById("themeToggle");
 const body = document.body;
 
+/* ================= STORAGE ================= */
 let chats = JSON.parse(localStorage.getItem("chats")) || [];
 let currentChatIndex = null;
 
@@ -21,18 +22,27 @@ themeToggle.onclick = () => {
   localStorage.setItem("theme", theme);
 };
 
+/* ================= DAILY LIMIT ================= */
+const LIMIT = 30;
+let today = new Date().toDateString();
+let savedDate = localStorage.getItem("msgDate");
+let msgCount = parseInt(localStorage.getItem("msgCount") || "0");
+
+if (savedDate !== today) {
+  msgCount = 0;
+  localStorage.setItem("msgDate", today);
+  localStorage.setItem("msgCount", "0");
+}
+
 /* ================= SAVE ================= */
 function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
 }
 
-/* ================= INLINE MENU HELPERS ================= */
+/* ================= INLINE MENU ================= */
 function closeAllMenus() {
-  document.querySelectorAll(".inline-menu").forEach(m => {
-    m.style.display = "none";
-  });
+  document.querySelectorAll(".inline-menu").forEach(m => m.style.display = "none");
 }
-
 document.addEventListener("click", closeAllMenus);
 
 function createMenu(onCopy, onDelete) {
@@ -66,7 +76,7 @@ function toggleMenu(menu, btn) {
   menu.style.left = btn.offsetLeft + "px";
 }
 
-/* ================= CHAT HISTORY ================= */
+/* ================= HISTORY ================= */
 function renderHistory() {
   historyDiv.innerHTML = "";
 
@@ -97,7 +107,7 @@ function renderHistory() {
       toggleMenu(menu, moreBtn);
     };
 
-    row.onclick = (e) => {
+    row.onclick = e => {
       if (e.target.classList.contains("more-btn")) return;
       currentChatIndex = i;
       renderChat();
@@ -110,7 +120,7 @@ function renderHistory() {
   });
 }
 
-/* ================= RENDER CHAT MESSAGES ================= */
+/* ================= CHAT ================= */
 function renderChat() {
   chatDiv.innerHTML = "";
   if (currentChatIndex === null) return;
@@ -118,7 +128,6 @@ function renderChat() {
   chats[currentChatIndex].messages.forEach((m, idx) => {
     const msg = document.createElement("div");
     msg.className = "msg " + m.role;
-    msg.style.position = "relative";
 
     const text = document.createElement("span");
     text.className = "msg-text";
@@ -157,16 +166,14 @@ newChatBtn.onclick = () => {
   chatDiv.innerHTML = "";
 };
 
-/* ================= SEND MESSAGE ================= */
+/* ================= SEND ================= */
 function autoResize() {
   input.style.height = "auto";
   input.style.height = input.scrollHeight + "px";
 }
-
 input.addEventListener("input", autoResize);
 
 sendBtn.onclick = sendMessage;
-
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -174,10 +181,14 @@ input.addEventListener("keydown", e => {
   }
 });
 
-/* MAIN SEND FUNCTION */
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
+
+  if (msgCount >= LIMIT) {
+    alert("Daily message limit reached. Try tomorrow 🙂");
+    return;
+  }
 
   if (currentChatIndex === null) {
     chats.push({ title: text.slice(0, 30), messages: [] });
@@ -185,6 +196,9 @@ function sendMessage() {
   }
 
   chats[currentChatIndex].messages.push({ role: "user", text });
+  msgCount++;
+  localStorage.setItem("msgCount", msgCount);
+
   input.value = "";
   autoResize();
   saveChats();
@@ -200,39 +214,44 @@ function sendMessage() {
   fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: text })
+    body: JSON.stringify({
+      message: text,
+      name: "Guest User"
+    })
   })
     .then(res => res.json())
     .then(data => {
       typing.remove();
       chats[currentChatIndex].messages.push({
         role: "bot",
-        text: data.reply
+        text: data.reply || "Something went wrong 😕"
       });
       saveChats();
+      renderChat();
+    })
+    .catch(() => {
+      typing.remove();
+      chats[currentChatIndex].messages.push({
+        role: "bot",
+        text: "Server error. Please try again later."
+      });
       renderChat();
     });
 }
 
-/* ================= CHATGPT STYLE AUTO SCROLL ================= */
+/* ================= AUTO SCROLL ================= */
 function scrollToBottom() {
   setTimeout(() => {
     chatDiv.scrollTop = chatDiv.scrollHeight;
   }, 50);
 }
 
-/* ================= MOBILE FIX — KEYBOARD OPEN BUG SOLVED ================= */
+/* ================= MOBILE FIX ================= */
 window.addEventListener("resize", () => {
-  if (window.innerWidth < 768) {
-    scrollToBottom();    // keyboard open → chat bottom
-  }
+  if (window.innerWidth < 768) scrollToBottom();
 });
-
-/* BACK PRESS / KEYBOARD CLOSE FIX */
 input.addEventListener("blur", () => {
-  if (window.innerWidth < 768) {
-    scrollToBottom();    // keyboard close → chat bottom
-  }
+  if (window.innerWidth < 768) scrollToBottom();
 });
 
 /* ================= INIT ================= */
