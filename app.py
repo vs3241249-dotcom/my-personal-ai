@@ -1,30 +1,23 @@
 from flask import Flask, render_template, request, jsonify, redirect, session, send_file
-import requests, os, sqlite3, datetime, csv, io
+import requests, os, datetime, json, csv, io
 
 app = Flask(__name__)
-app.secret_key = "supersecret123"   # change later
+app.secret_key = "supersecret123"
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
-DB = "chats.db"
+DATA_FILE = "chat_logs.json"
 
-def init_db():
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS chats (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ip TEXT,
-        role TEXT,
-        message TEXT,
-        timestamp TEXT
-    )
-    """)
-    conn.commit()
-    conn.close()
+def load_logs():
+    if not os.path.exists(DATA_FILE):
+        return []
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-init_db()
+def save_logs(data):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 @app.route("/")
 def home():
@@ -36,14 +29,10 @@ def chat():
     user_ip = request.remote_addr
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
+    logs = load_logs()
+    logs.append({"ip": user_ip, "role": "user", "message": user_msg, "time": time})
 
     try:
-        c.execute("INSERT INTO chats (ip, role, message, timestamp) VALUES (?, ?, ?, ?)",
-                  (user_ip, "user", user_msg, time))
-        conn.commit()
-
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -62,22 +51,18 @@ def chat():
         )
 
         reply = res.json()["choices"][0]["message"]["content"]
-
-        c.execute("INSERT INTO chats (ip, role, message, timestamp) VALUES (?, ?, ?, ?)",
-                  (user_ip, "bot", reply, time))
-        conn.commit()
+        logs.append({"ip": user_ip, "role": "bot", "message": reply, "time": time})
+        save_logs(logs)
 
         return jsonify({"reply": reply})
 
     except Exception as e:
         print("ERROR:", e)
+        save_logs(logs)
         return jsonify({"reply": "Server error, thoda baad try karo"}), 500
 
-    finally:
-        conn.close()
 
-
-# ========== ADMIN SYSTEM ==========
+# ========= ADMIN SYSTEM =========
 
 def admin_required(fn):
     def wrapper(*args, **kwargs):
@@ -108,47 +93,31 @@ def admin_logout():
 @app.route("/admin")
 @admin_required
 def admin_panel():
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("SELECT ip, role, message, timestamp FROM chats ORDER BY id DESC LIMIT 1000")
-    rows = c.fetchall()
-    conn.close()
-
-    return render_template("admin_dashboard.html", chats=rows)
+    logs = load_logs()[::-1]   # latest first
+    return render_template("admin_dashboard.html", chats=logs)
 
 
 @app.route("/admin/search")
 @admin_required
 def admin_search():
-    q = request.args.get("q", "")
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("""
-    SELECT ip, role, message, timestamp FROM chats
-    WHERE message LIKE ? OR ip LIKE ?
-    ORDER BY id DESC
-    """, (f"%{q}%", f"%{q}%"))
-    rows = c.fetchall()
-    conn.close()
-    return jsonify(rows)
+    q = request.args.get("q", "").lower()
+    logs = load_logs()
+    filtered = [c for c in logs if q in c["message"].lower() or q in c["ip"]]
+    return jsonify(filtered[::-1])
 
 
 @app.route("/admin/export")
 @admin_required
 def admin_export():
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("SELECT ip, role, message, timestamp FROM chats ORDER BY id DESC")
-    rows = c.fetchall()
-    conn.close()
+    logs = load_logs()
 
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["IP", "Role", "Message", "Time"])
-    writer.writerows(rows)
+    for c in logs:
+        writer.writerow([c["ip"], c["role"], c["message"], c["time"]])
 
     mem = io.BytesIO()
     mem.write(output.getvalue().encode("utf-8"))
     mem.seek(0)
-
     return send_file(mem, mimetype="text/csv", as_attachment=True, download_name="chat_history.csv")
