@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Personal AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body class="light">
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span>Your Chats</span>
+      <button id="newChat">+</button>
+    </div>
+    <div id="history"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <span>🤖 My Personal AI</span>
+      <button id="themeToggle">🌙</button>
+    </div>
+
+    <!-- CHAT -->
+    <div id="chat" class="chat"></div>
+
+    <!-- INPUT -->
+    <div class="input-bar">
+      <textarea id="input" placeholder="Message My Personal AI..."></textarea>
+      <button id="send">▶</button>
+    </div>
+
+  </main>
+</div>
+
+<!-- CONTEXT MENU -->
+
+<script src="/static/script.js"></script>
+</body>
+</html>
