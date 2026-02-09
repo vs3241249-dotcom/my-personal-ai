@@ -26,7 +26,7 @@ function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
 }
 
-/* ================= MENU HELPERS ================= */
+/* ================= INLINE MENU HELPERS ================= */
 function closeAllMenus() {
   document.querySelectorAll(".inline-menu").forEach(m => {
     m.style.display = "none";
@@ -63,9 +63,7 @@ function toggleMenu(menu, btn) {
   closeAllMenus();
   menu.style.display = "block";
   menu.style.top = btn.offsetTop + btn.offsetHeight + "px";
- menu.style.right = "auto";
-menu.style.left = btn.offsetLeft + "px";
-
+  menu.style.left = btn.offsetLeft + "px";
 }
 
 /* ================= CHAT HISTORY ================= */
@@ -100,11 +98,11 @@ function renderHistory() {
     };
 
     row.onclick = (e) => {
-  if (e.target.classList.contains("more-btn")) return;
-  currentChatIndex = i;
-  renderChat();
-  renderHistory();
-};
+      if (e.target.classList.contains("more-btn")) return;
+      currentChatIndex = i;
+      renderChat();
+      renderHistory();
+    };
 
     row.appendChild(moreBtn);
     row.appendChild(menu);
@@ -112,7 +110,7 @@ function renderHistory() {
   });
 }
 
-/* ================= CHAT ================= */
+/* ================= RENDER CHAT MESSAGES ================= */
 function renderChat() {
   chatDiv.innerHTML = "";
   if (currentChatIndex === null) return;
@@ -150,7 +148,7 @@ function renderChat() {
     chatDiv.appendChild(msg);
   });
 
-  chatDiv.scrollTop = chatDiv.scrollHeight;
+  scrollToBottom();
 }
 
 /* ================= NEW CHAT ================= */
@@ -176,6 +174,7 @@ input.addEventListener("keydown", e => {
   }
 });
 
+/* MAIN SEND FUNCTION */
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
@@ -196,6 +195,7 @@ function sendMessage() {
   typing.className = "msg bot typing";
   typing.textContent = "AI is typing...";
   chatDiv.appendChild(typing);
+  scrollToBottom();
 
   fetch("/chat", {
     method: "POST",
@@ -213,6 +213,27 @@ function sendMessage() {
       renderChat();
     });
 }
+
+/* ================= CHATGPT STYLE AUTO SCROLL ================= */
+function scrollToBottom() {
+  setTimeout(() => {
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  }, 50);
+}
+
+/* ================= MOBILE FIX — KEYBOARD OPEN BUG SOLVED ================= */
+window.addEventListener("resize", () => {
+  if (window.innerWidth < 768) {
+    scrollToBottom();    // keyboard open → chat bottom
+  }
+});
+
+/* BACK PRESS / KEYBOARD CLOSE FIX */
+input.addEventListener("blur", () => {
+  if (window.innerWidth < 768) {
+    scrollToBottom();    // keyboard close → chat bottom
+  }
+});
 
 /* ================= INIT ================= */
 renderHistory();
