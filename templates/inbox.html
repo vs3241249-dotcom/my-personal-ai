@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- OWNERSHIP META (PROOF) -->
-  <meta name="author" content="vaibhav">
-  <meta name="developer" content="vaibhav - My Personal AI Platform">
+  <meta name="author" content="Vaibhav">
+  <meta name="developer" content="Vaibhav - My Personal AI Platform">
 
   <title>My Personal AI</title>
   <link rel="stylesheet" href="/static/style.css" />
@@ -67,7 +67,6 @@
   © <span id="year"></span> | Developed & Owned by <strong>Vaibhav</strong>
 </footer>
 
-
 <!-- JS -->
 <script>
   function toggleSidebar() {
@@ -77,9 +76,11 @@
     sidebar.classList.toggle("open");
     overlay.classList.toggle("show");
   }
-</script>
-  <script>
-  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Auto year (safe)
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("year").textContent = new Date().getFullYear();
+  });
 </script>
 
 <script src="/static/script.js"></script>
