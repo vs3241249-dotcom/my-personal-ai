@@ -29,7 +29,7 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "openai/gpt-4o-mini",
+               "model": "openai/gpt-3.5-turbo"
                 "messages": [
                     {
                         "role": "system",
@@ -54,6 +54,7 @@ def chat():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
 
 
