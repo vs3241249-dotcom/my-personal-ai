@@ -3,7 +3,7 @@ import requests
 import os
 import json
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
 
@@ -49,8 +49,7 @@ def chat():
             return jsonify({"reply": "Empty message"}), 400
 
         # ✅ IST TIME (FIXED)
-        ist = pytz.timezone("Asia/Kolkata")
-        time_now = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
+     time_now = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d-%m-%Y %H:%M:%S")
 
         # ✅ SAVE MESSAGE (PERMANENT)
         admin_messages.append({
@@ -99,3 +98,4 @@ def admin_panel():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
