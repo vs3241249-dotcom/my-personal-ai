@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui;
+      background: #0b1220;
+      color: white;
+    }
+    header {
+      background: #020617;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    header a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .top {
+      padding: 12px 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .top input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+    }
+    .top button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #1e293b;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #020617;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background: #020617;
+    }
+    .wrap {
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+    }
+    .role-user { color: #93c5fd; }
+    .role-bot { color: #a7f3d0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>📊 Admin Dashboard</h2>
+  <div>
+    <a href="/admin/export">⬇ Export CSV</a> |
+    <a href="/admin/logout">Logout</a>
+  </div>
+</header>
+
+<div class="top">
+  <input id="search" placeholder="Search by message or IP..." oninput="doSearch()">
+</div>
+
+<div class="wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>IP</th>
+        <th>Role</th>
+        <th>Message</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      {% for c in chats %}
+      <tr>
+        <td>{{c[0]}}</td>
+        <td class="role-{{c[1]}}">{{c[1]}}</td>
+        <td>{{c[2]}}</td>
+        <td>{{c[3]}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function doSearch(){
+  const q = document.getElementById("search").value;
+  fetch("/admin/search?q=" + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(data => {
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+      data.forEach(c => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${c[0]}</td>
+            <td class="role-${c[1]}">${c[1]}</td>
+            <td>${c[2]}</td>
+            <td>${c[3]}</td>
+          </tr>
+        `;
+      });
+    });
+}
+</script>
+
+</body>
+</html>

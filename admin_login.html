@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Login</title>
+  <style>
+    body {
+      background: #0b1220;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: system-ui;
+      color: white;
+    }
+    .box {
+      background: #020617;
+      padding: 30px;
+      border-radius: 12px;
+      width: 300px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+    button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .err {
+      color: #f87171;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <form class="box" method="POST">
+    <h2>🔐 Admin Login</h2>
+    <input type="password" name="password" placeholder="Enter admin password" required>
+    <button>Login</button>
+    {% if error %}<div class="err">{{error}}</div>{% endif %}
+  </form>
+</body>
+</html>
