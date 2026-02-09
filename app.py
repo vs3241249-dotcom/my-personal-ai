@@ -16,9 +16,15 @@ def test():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_msg = request.json.get("message")
-
     try:
+        data_req = request.get_json()
+        if not data_req or "message" not in data_req:
+            return jsonify({"reply": "Message missing"}), 400
+
+        user_msg = data_req.get("message", "").strip()
+        if not user_msg:
+            return jsonify({"reply": "Empty message"}), 400
+
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -52,9 +58,5 @@ def chat():
         return jsonify({"reply": "Server error"}), 500
 
 
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
-
-
