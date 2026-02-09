@@ -28,7 +28,7 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "openai/gpt-4o-mini",
+                "model": "openai/gpt-3.5-turbo"
                 "messages": [
                     {"role": "system", "content": "Reply in simple Hindi-English mix."},
                     {"role": "user", "content": user_msg}
@@ -37,8 +37,24 @@ def chat():
             timeout=30
         )
 
-        data = res.json()
-        return jsonify({"reply": data["choices"][0]["message"]["content"]})
+       data = res.json()
+
+if res.status_code != 200:
+    print("OPENROUTER ERROR:", data)
+    return jsonify({
+        "reply": "AI service error. API key / credits / model issue."
+    }), 500
+
+if "choices" not in data:
+    print("INVALID RESPONSE:", data)
+    return jsonify({
+        "reply": "Invalid AI response received."
+    }), 500
+
+return jsonify({
+    "reply": data["choices"][0]["message"]["content"]
+})
+
 
     except Exception as e:
         print("ERROR:", e)
@@ -47,3 +63,4 @@ def chat():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
