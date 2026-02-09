@@ -1,3 +1,4 @@
+/* RESET */
 * {
   box-sizing: border-box;
   font-family: system-ui, -apple-system, BlinkMacSystemFont;
@@ -30,7 +31,7 @@ body.dark {
 /* ===== SIDEBAR ===== */
 .sidebar {
   width: 260px;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0,0,0,0.05);
   padding: 10px;
   overflow-y: auto;
 }
@@ -90,7 +91,7 @@ body.dark .sidebar {
   cursor: pointer;
 }
 
-/* ===== CHAT ===== */
+/* ===== CHAT AREA ===== */
 .chat {
   flex: 1;
   padding: 16px;
@@ -98,9 +99,10 @@ body.dark .sidebar {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  scroll-behavior: smooth;
 }
 
-/* scrollbar hide */
+/* Hide scrollbar */
 .chat::-webkit-scrollbar {
   display: none;
 }
@@ -120,14 +122,14 @@ body.dark .sidebar {
 
 .msg.bot {
   align-self: flex-start;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0,0,0,0.08);
 }
 
 body.dark .msg.bot {
   background: #1e293b;
 }
 
-/* ===== INPUT ===== */
+/* ===== INPUT BAR ===== */
 .input-bar {
   display: flex;
   padding: 10px;
@@ -153,12 +155,11 @@ textarea {
   cursor: pointer;
 }
 
-/* ===== MOBILE MENU ===== */
+/* ===== MOBILE ONLY ===== */
 .mobile-menu-btn {
   display: none;
 }
 
-/* ===== OVERLAY ===== */
 .overlay {
   display: none;
 }
@@ -193,15 +194,15 @@ textarea {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.45);
-    display: none;
     z-index: 1000;
+    display: none;
   }
 
   .overlay.show {
     display: block;
   }
 
-  /* --- FIXED INPUT BAR LIKE CHATGPT --- */
+  /* FIXED INPUT BAR LIKE CHATGPT */
   .input-bar {
     position: fixed;
     bottom: 0;
@@ -210,11 +211,12 @@ textarea {
     background: inherit;
     z-index: 2000;
     padding: 10px;
+    border-top: 1px solid rgba(0,0,0,0.1);
   }
 
-  /* chat scroll area space for input bar */
+  /* Give space above input bar → chat NEVER goes under it */
   .chat {
-    padding-bottom: 120px; /* FIXED SPACE */
+    padding-bottom: 120px !important;
   }
 
   .msg {
