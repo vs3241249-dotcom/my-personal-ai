@@ -379,4 +379,24 @@ body.light .mobile-menu:hover,
 body.light .more-btn:hover {
   opacity: 0.85;
 }
+/* ===== MOBILE LIGHT THEME: SIDEBAR HISTORY CONTRAST FIX ===== */
+
+@media (max-width: 768px) {
+  body.light .sidebar {
+    background: #f1f3f5; /* thoda darker than page */
+  }
+
+  body.light .chat-title {
+    color: #111827;       /* dark readable text */
+  }
+
+  body.light .chat-title:hover {
+    background: rgba(0,0,0,0.08);
+  }
+
+  body.light .chat-title.active {
+    background: #2563eb; /* same blue */
+    color: #ffffff;      /* pure white text */
+  }
+}
 
