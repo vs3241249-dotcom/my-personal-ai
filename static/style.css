@@ -94,9 +94,8 @@ body.dark .sidebar {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 0;
 }
-
 /* ================= TOP BAR ================= */
 
 .top {
@@ -401,23 +400,29 @@ body.light .more-btn:hover {
 }
 /* ================= FOOTER (FINAL FIX) ================= */
 
+/* ================= FOOTER (CORRECT & STABLE) ================= */
+
 .app-footer {
   width: 100%;
   text-align: center;
   font-size: 13px;
   padding: 6px 0;
   color: #6b7280;
-  background: transparent;
-
-  /* 👇 IMPORTANT FIX */
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  pointer-events: none;
+  flex-shrink: 0;
 }
 
+/* Dark theme */
+body.dark .app-footer {
+  color: #9ca3af;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app-footer {
+    font-size: 12px;
+    padding-bottom: 8px;
+  }
+}
 /* Dark theme */
 body.dark .app-footer {
   color: #9ca3af;
