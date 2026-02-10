@@ -340,3 +340,31 @@ body.dark .inline-menu {
     line-height: 1.4;
   }
 }
+/* ===== FIX: INLINE MENU POSITION & LIGHT THEME VISIBILITY ===== */
+
+/* Prevent menu going outside screen */
+.inline-menu {
+  max-width: calc(100vw - 16px);
+  right: auto;
+  left: auto;
+}
+
+/* If menu is near right edge, pull it inside */
+.inline-menu.align-right {
+  right: 8px !important;
+  left: auto !important;
+}
+
+/* Light theme contrast fix */
+body.light .inline-menu {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+body.light .menu-item {
+  color: #111827; /* dark text */
+}
+
+body.light .menu-item:hover {
+  background: rgba(0,0,0,0.06);
+}
