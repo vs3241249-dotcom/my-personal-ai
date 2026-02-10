@@ -1,79 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <title>Inbox</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Personal AI</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="light" onload="checkLogin()">
+<body class="light">
 
-  <!-- LOGIN POPUP -->
-  <div id="loginOverlay" class="login-overlay">
-    <div class="login-card">
-      <h2>🤖 Welcome to My Personal AI</h2>
-      <p>Enter your name to start chatting</p>
-      <input type="text" id="usernameInput" placeholder="Your name..." />
-      <button onclick="saveUsername()">Start Chat</button>
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <strong id="userName">User</strong>
+      <button id="newChat">+</button>
     </div>
-  </div>
 
-  <div class="app">
+    <div id="chatList">
+      <!-- chats yahan JS se add honge -->
+    </div>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <span>Your Chats</span>
-        <button id="newChat">+</button>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <button class="menu-btn" id="menuBtn">☰</button>
+      <button id="themeToggle">🌙</button>
+    </div>
+
+    <!-- CHAT AREA -->
+    <div class="chat" id="chatBox">
+      <div class="msg bot">
+        Hello 👋<br>
+        How can I help you?
       </div>
-      <div id="history"></div>
-    </aside>
+    </div>
 
-    <!-- MAIN -->
-    <main class="main">
+    <!-- INPUT -->
+    <div class="input-bar">
+      <textarea id="messageInput" placeholder="Type a message..."></textarea>
+      <button id="send">Send</button>
+    </div>
 
-      <!-- TOP BAR -->
-      <div class="top-bar">
-        <span>🤖 My Personal AI</span>
-        <button id="themeToggle">🌙</button>
-      </div>
+    <!-- FOOTER -->
+    <div class="footer">
+      Chat system • Secure
+    </div>
 
-      <!-- CHAT -->
-      <div id="chat" class="chat"></div>
-
-      <!-- INPUT -->
-      <div class="input-bar">
-        <textarea id="input" placeholder="Message My Personal AI..."></textarea>
-        <button id="send">▶</button>
-      </div>
-<div class="footer">
-  🤖 This AI didn’t build itself — <b>Vaibhav</b> did
+  </main>
 </div>
 
-    </main>
-  </div>
-
-  <!-- LOGIN SCRIPT -->
-  <script>
-    function saveUsername() {
-      const name = document.getElementById("usernameInput").value.trim();
-      if (!name) {
-        alert("Please enter your name");
-        return;
-      }
-      localStorage.setItem("username", name);
-      document.getElementById("loginOverlay").style.display = "none";
-    }
-
-    function checkLogin() {
-      const name = localStorage.getItem("username");
-      if (name) {
-        document.getElementById("loginOverlay").style.display = "none";
-      }
-    }
-  </script>
-
-  <script src="/static/script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
