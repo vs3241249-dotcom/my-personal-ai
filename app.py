@@ -8,17 +8,16 @@ from pymongo import MongoClient
 app = Flask(__name__)
 app.secret_key = "super-secret-key-change-this"
 
-# ---------- ENV VARIABLES ----------
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 MONGO_URI = os.getenv("MONGO_URI")
 
-# ---------- MONGODB CONNECT ----------
+# ---------------- MONGODB SETUP ----------------
 client = MongoClient(MONGO_URI)
 db = client["chatbot_db"]
 chats_col = db["chats"]
 
-# ---------- SAVE CHAT ----------
+# ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg):
     ist = pytz.timezone("Asia/Kolkata")
     now = datetime.now(ist).strftime("%Y-%m-%d %H:%M:%S")
@@ -34,7 +33,7 @@ def get_all_chats():
     rows = chats_col.find().sort("_id", -1)
     return [(r["ip"], r["role"], r["message"], r["time"]) for r in rows]
 
-# ---------- USER CHAT ----------
+# ---------------- USER CHAT ----------------
 @app.route("/")
 def home():
     return render_template("inbox.html")
@@ -51,8 +50,7 @@ def chat():
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-                "X-Title": "My Personal AI"
+                "Content-Type": "application/json"
             },
             json={
                 "model": "openai/gpt-4o-mini",
@@ -71,10 +69,10 @@ def chat():
 
         return jsonify({"reply": bot_reply})
 
-    except Exception:
+    except Exception as e:
         return jsonify({"reply": "Server error, baad me try karo"}), 500
 
-# ---------- ADMIN LOGIN ----------
+# ---------------- ADMIN LOGIN ----------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin_login():
     if session.get("admin"):
@@ -104,7 +102,7 @@ def admin_logout():
     session.pop("admin", None)
     return redirect("/admin")
 
-# ---------- SEARCH ----------
+# ---------------- SEARCH ----------------
 @app.route("/admin/search")
 def admin_search():
     if not session.get("admin"):
@@ -121,7 +119,7 @@ def admin_search():
 
     return jsonify([[r["ip"], r["role"], r["message"], r["time"]] for r in rows])
 
-# ---------- EXPORT ----------
+# ---------------- EXPORT ----------------
 @app.route("/admin/export")
 def export_csv():
     if not session.get("admin"):
@@ -137,6 +135,5 @@ def export_csv():
         "Content-Disposition": "attachment; filename=chat_history.csv"
     }
 
-# ---------- RUN ----------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
