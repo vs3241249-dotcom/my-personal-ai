@@ -97,10 +97,24 @@ function toggleMenu(menu, btn) {
 
   const rect = btn.getBoundingClientRect();
   menu.style.display = "block";
-  menu.style.position = "fixed";   // 🔥 mobile safe
+  menu.style.position = "fixed";
   menu.style.top = rect.bottom + "px";
-  menu.style.left = rect.left + "px";
+
+  /* 🔥 SCREEN SAFE POSITION */
+  const menuWidth = 140; // approx width
+  const screenWidth = window.innerWidth;
+
+  if (rect.right + menuWidth > screenWidth) {
+    // right edge case (USER MESSAGE)
+    menu.style.left = "auto";
+    menu.style.right = "8px";
+  } else {
+    // normal (BOT MESSAGE)
+    menu.style.right = "auto";
+    menu.style.left = rect.left + "px";
+  }
 }
+
 
 /* ================= CHAT HISTORY ================= */
 function renderHistory() {
