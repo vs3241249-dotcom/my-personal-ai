@@ -1,59 +1,39 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
 import requests
 import os
-import sqlite3
 from datetime import datetime
 import pytz
+from pymongo import MongoClient
 
 app = Flask(__name__)
 app.secret_key = "super-secret-key-change-this"
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-ADMIN_PASSWORD = "Vaibhav@1234"   # 👈 apna strong password yahan set kar
+ADMIN_PASSWORD = "Vaibhav@1234"   # 👈 tumhara admin password
 
-import os
+# ---------------- MONGODB SETUP ----------------
+MONGO_URI = "mongodb+srv://vs3241249_db_user:Vaibhav@123@cluster0.u0oqjem.mongodb.net/?appName=Cluster0"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, "chat.db")
+client = MongoClient(MONGO_URI)
+db = client["chatbot_db"]
+chats_col = db["chats"]
 
-
-# ---------------- DB INIT ----------------
-def init_db():
-    con = sqlite3.connect(DB_FILE)
-    cur = con.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS chats (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ip TEXT,
-            role TEXT,
-            message TEXT,
-            time TEXT
-        )
-    """)
-    con.commit()
-    con.close()
-
-init_db()
-
+# ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg):
     ist = pytz.timezone("Asia/Kolkata")
     now = datetime.now(ist).strftime("%Y-%m-%d %H:%M:%S")
 
-    con = sqlite3.connect(DB_FILE)
-    cur = con.cursor()
-    cur.execute("INSERT INTO chats (ip, role, message, time) VALUES (?,?,?,?)",
-                (ip, role, msg, now))
-    con.commit()
-    con.close()
+    chats_col.insert_one({
+        "ip": ip,
+        "role": role,
+        "message": msg,
+        "time": now
+    })
 
 def get_all_chats():
-    con = sqlite3.connect(DB_FILE)
-    cur = con.cursor()
-    cur.execute("SELECT ip, role, message, time FROM chats ORDER BY id DESC")
-    rows = cur.fetchall()
-    con.close()
-    return rows
+    rows = chats_col.find().sort("_id", -1)
+    return [(r["ip"], r["role"], r["message"], r["time"]) for r in rows]
 
 # ---------------- USER CHAT ----------------
 @app.route("/")
@@ -92,9 +72,8 @@ def chat():
 
         return jsonify({"reply": bot_reply})
 
-    except Exception as e:
+    except Exception:
         return jsonify({"reply": "Server error, baad me try karo"}), 500
-
 
 # ---------------- ADMIN LOGIN ----------------
 @app.route("/admin", methods=["GET", "POST"])
@@ -113,7 +92,6 @@ def admin_login():
 
     return render_template("admin_login.html", error=error)
 
-
 @app.route("/admin/dashboard")
 def admin_dashboard():
     if not session.get("admin"):
@@ -122,12 +100,10 @@ def admin_dashboard():
     chats = get_all_chats()
     return render_template("admin_dashboard.html", chats=chats)
 
-
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin", None)
     return redirect("/admin")
-
 
 # ---------------- SEARCH ----------------
 @app.route("/admin/search")
@@ -137,18 +113,14 @@ def admin_search():
 
     q = request.args.get("q", "")
 
-    con = sqlite3.connect(DB_FILE)
-    cur = con.cursor()
-    cur.execute("""
-        SELECT ip, role, message, time FROM chats
-        WHERE ip LIKE ? OR message LIKE ?
-        ORDER BY id DESC
-    """, (f"%{q}%", f"%{q}%"))
-    rows = cur.fetchall()
-    con.close()
+    rows = chats_col.find({
+        "$or": [
+            {"ip": {"$regex": q, "$options": "i"}},
+            {"message": {"$regex": q, "$options": "i"}}
+        ]
+    }).sort("_id", -1)
 
-    return jsonify(rows)
-
+    return jsonify([[r["ip"], r["role"], r["message"], r["time"]] for r in rows])
 
 # ---------------- EXPORT ----------------
 @app.route("/admin/export")
@@ -166,9 +138,6 @@ def export_csv():
         "Content-Disposition": "attachment; filename=chat_history.csv"
     }
 
-
 # ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
-
