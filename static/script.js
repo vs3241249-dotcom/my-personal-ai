@@ -1,4 +1,4 @@
-const chatDiv = document.getElementById("chat");
+ const chatDiv = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("send");
 const historyDiv = document.getElementById("history");
