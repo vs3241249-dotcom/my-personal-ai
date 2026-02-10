@@ -1,3 +1,4 @@
+/* ================= BASE ================= */
 * {
   box-sizing: border-box;
   font-family: system-ui, -apple-system, BlinkMacSystemFont;
@@ -6,9 +7,10 @@
 body {
   margin: 0;
   height: 100vh;
+  overflow: hidden;
 }
 
-/* THEMES */
+/* ================= THEMES ================= */
 body.light {
   background: #f7f7f8;
   color: #1f2937;
@@ -19,12 +21,13 @@ body.dark {
   color: #e5e7eb;
 }
 
-/* LAYOUT */
+/* ================= LAYOUT ================= */
 .app {
   display: flex;
   height: 100vh;
 }
 
+/* ================= SIDEBAR ================= */
 .sidebar {
   width: 260px;
   background: rgba(0,0,0,0.05);
@@ -46,7 +49,7 @@ body.dark .sidebar {
 .sidebar-header button {
   border: none;
   background: #2563eb;
-  color: white;
+  color: #fff;
   border-radius: 6px;
   padding: 4px 8px;
   cursor: pointer;
@@ -59,25 +62,35 @@ body.dark .sidebar {
   margin-bottom: 4px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .chat-title.active {
   background: #2563eb;
-  color: white;
+  color: #fff;
 }
 
-/* MAIN */
+/* ================= MAIN ================= */
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* ================= TOP BAR ================= */
 .top-bar {
   padding: 10px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
 }
 
 #themeToggle {
@@ -87,7 +100,7 @@ body.dark .sidebar {
   cursor: pointer;
 }
 
-/* CHAT */
+/* ================= CHAT ================= */
 .chat {
   flex: 1;
   padding: 16px;
@@ -95,6 +108,11 @@ body.dark .sidebar {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  scrollbar-width: none;
+}
+
+.chat::-webkit-scrollbar {
+  display: none;
 }
 
 .msg {
@@ -108,7 +126,7 @@ body.dark .sidebar {
 .msg.user {
   align-self: flex-end;
   background: #2563eb;
-  color: white;
+  color: #fff;
 }
 
 .msg.bot {
@@ -125,7 +143,66 @@ body.dark .msg.bot {
   opacity: 0.7;
 }
 
-/* INPUT */
+/* ================= 3 DOT MENU ================= */
+.more-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  opacity: 0;
+}
+
+.msg.user .more-btn {
+  position: absolute;
+  top: 6px;
+  left: -26px;
+}
+
+.msg.bot .more-btn {
+  position: absolute;
+  top: 6px;
+  right: -26px;
+}
+
+.msg:hover .more-btn {
+  opacity: 1;
+}
+
+.chat-title .more-btn {
+  opacity: 1;
+  font-size: 16px;
+}
+
+/* ================= CONTEXT / INLINE MENU ================= */
+.context-menu,
+.inline-menu {
+  position: absolute;
+  background: #111;
+  color: #fff;
+  border-radius: 10px;
+  min-width: 120px;
+  z-index: 999;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  display: none;
+}
+
+.context-menu div,
+.inline-menu .menu-item {
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.context-menu div:hover,
+.inline-menu .menu-item:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* ================= INPUT ================= */
 .input-bar {
   display: flex;
   padding: 10px;
@@ -145,150 +222,59 @@ textarea {
 button#send {
   border: none;
   background: #2563eb;
-  color: white;
+  color: #fff;
   border-radius: 10px;
   padding: 0 16px;
   cursor: pointer;
 }
 
-/* CONTEXT MENU */
-.context-menu {
-  position: absolute;
-  background: #111;
-  color: white;
-  border-radius: 8px;
-  display: none;
-  z-index: 999;
-}
-
-.context-menu div {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.context-menu div:hover {
-  background: #2563eb;
-}
-.more-btn {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 4px;
-}
-
-.msg.user .more-btn {
-  position: absolute;
-  top: 6px;
-  left: -26px;      /* 👈 bubble ke LEFT side */
-  opacity: 0;
-}
-
-.msg.bot .more-btn {
-  position: absolute;
-  top: 6px;
-  right: -26px;
-  opacity: 0;
-}
-
-
-.msg:hover .more-btn {
-  opacity: 1;
-}
-
-.chat-title .more-btn {
-  opacity: 1;
-  font-size: 16px;
-}
-
-.context-menu {
-  background: #111;
-  color: #fff;
-  border-radius: 10px;
-  min-width: 120px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.3);
-}
-/* INLINE MENU (3-dot click) */
-.inline-menu {
-  position: absolute;
-  right: 8px;
-  top: 36px;
-  background: #111;
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 10;
-  box-shadow: 0 10px 30px rgba(0,0,0,.4);
-}
-
-.inline-menu .menu-item {
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.inline-menu .menu-item:hover {
-  background: #2563eb;
-  color: white;
-}
-body {
-  overflow: hidden;   /* ⛔ NO PAGE SCROLL */
-}
-
-.chat {
-  overflow-y: auto;
-  scrollbar-width: none;        /* Firefox */
-}
-/* FOOTER */
+/* ================= FOOTER ================= */
 .footer {
   text-align: center;
   font-size: 13px;
   padding: 8px 12px;
   opacity: 0.75;
   border-top: 1px solid rgba(0,0,0,0.1);
-  letter-spacing: 0.3px;
   user-select: none;
 }
 
-/* Dark mode */
 body.dark .footer {
   border-top: 1px solid #1e293b;
   color: #9ca3af;
 }
 
-/* Subtle hover glow */
 .footer:hover {
   opacity: 1;
 }
 
-
-.chat::-webkit-scrollbar {
-  display: none;                /* Chrome */
-}
-/* 📱 MOBILE FIX */
+/* ================= MOBILE (CHATGPT STYLE) ================= */
 @media (max-width: 768px) {
 
-  .app {
-    flex-direction: column;
+  .menu-btn {
+    display: block;
   }
 
+  .app {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Sidebar slide */
   .sidebar {
-    width: 100%;
-    height: auto;
-    display: none;   /* 👈 hide sidebar on mobile */
+    position: fixed;
+    top: 0;
+    left: -260px;
+    height: 100vh;
+    z-index: 3000;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
   }
 
   .main {
     width: 100%;
-  }
-
-  .top-bar {
-    justify-content: space-between;
-  }
-
-  .chat {
-    padding: 12px;
   }
 
   .msg {
@@ -296,77 +282,8 @@ body.dark .footer {
     font-size: 14px;
   }
 
-  .input-bar textarea {
-    font-size: 14px;
-  }
-}
-/* ================= MOBILE VIEW FIX ================= */
-@media (max-width: 768px) {
-
-  /* App layout */
-  .app {
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  /* Sidebar → top horizontal scroll chats */
-  .sidebar {
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 6px;
-    gap: 6px;
-  }
-
-  .sidebar-header {
-    display: none; /* mobile pe header hide */
-  }
-
-  #history {
-    display: flex;
-    gap: 6px;
-  }
-
-  .chat-title {
-    white-space: nowrap;
-    min-width: 120px;
-    font-size: 13px;
-    padding: 6px 8px;
-  }
-
-  /* Main area */
-  .main {
-    flex: 1;
-    height: 100%;
-  }
-
-  /* Chat bubbles full width */
-  .msg {
-    max-width: 90%;
-    font-size: 14px;
-  }
-
-  /* Input bar fix */
-  .input-bar {
-    padding: 8px;
-    gap: 6px;
-  }
-
-  textarea {
-    font-size: 14px;
-  }
-
-  button#send {
-    padding: 0 12px;
-    font-size: 14px;
-  }
-
-  /* 3-dot button always visible on mobile */
   .more-btn {
-    opacity: 1 !important;
+    opacity: 1;
   }
 
   .msg.user .more-btn {
@@ -377,4 +294,3 @@ body.dark .footer {
     right: -20px;
   }
 }
-
