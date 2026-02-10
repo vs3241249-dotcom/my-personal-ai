@@ -12,7 +12,11 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 ADMIN_PASSWORD = "12345"   # 👈 apna strong password yahan set kar
 
-DB_FILE = "chat.db"
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "chat.db")
+
 
 # ---------------- DB INIT ----------------
 def init_db():
@@ -165,4 +169,5 @@ def export_csv():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
+
