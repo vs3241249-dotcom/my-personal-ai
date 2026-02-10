@@ -69,6 +69,10 @@ body.dark .sidebar {
 
 /* Chat history item */
 .chat-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
@@ -201,10 +205,27 @@ body.dark textarea {
   cursor: pointer;
 }
 
+/* ================= 3 DOT BUTTON ================= */
+
+.more-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.more-btn:hover {
+  opacity: 1;
+}
+
 /* ================= INLINE MENU ================= */
 
 .inline-menu {
   position: fixed;
+  min-width: 120px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.25);
@@ -246,6 +267,30 @@ body.dark .inline-menu {
 
   .mobile-menu {
     display: inline-block;
+  }
+
+  /* MOBILE TOP BAR ALIGN */
+  .top {
+    display: flex;
+    align-items: center;
+  }
+
+  .top .left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .top .title {
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .top .actions {
+    flex-shrink: 0;
   }
 
   /* SIDEBAR */
@@ -293,10 +338,5 @@ body.dark .inline-menu {
     max-width: 85%;
     font-size: 14px;
     line-height: 1.4;
-  }
-
-  .more-btn {
-    font-size: 18px;
-    padding: 4px;
   }
 }
