@@ -1,39 +1,71 @@
-inbox: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Personal AI</title>
-<link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Personal AI</title>
+
+  <!-- Main Styles -->
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 
 <body class="light">
-<div class="container">
+  <div class="container">
 
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h3>Your Chats</h3>
-      <button id="newChat">+</button>
-    </div>
-    <div id="history"></div>
-  </aside>
+    <!-- SIDEBAR (Desktop history) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3>Your Chats</h3>
+        <button id="newChat" title="New Chat">＋</button>
+      </div>
 
-  <main class="chat-area">
-    <header class="top">
-      🤖 My Personal AI
-      <span id="themeToggle">🌞</span>
-    </header>
+      <div id="history"></div>
+    </aside>
 
-    <div id="chat"></div>
+    <!-- CHAT AREA -->
+    <main class="chat-area">
 
-    <div class="input-area">
-      <textarea id="input" placeholder="Type your message..."></textarea>
-      <button id="send">➤</button>
-    </div>
-  </main>
+      <!-- TOP BAR -->
+      <header class="top">
+        <div class="title">
+          🤖 My Personal AI
+        </div>
 
-</div>
+        <div class="actions">
+          <!-- Theme Toggle -->
+          <span id="themeToggle" title="Toggle Theme">🌞</span>
 
-<script src="/static/script.js"></script>
+          <!-- Mobile menu icon (CSS will handle visibility) -->
+          <span class="mobile-menu" id="mobileMenu">☰</span>
+        </div>
+      </header>
+
+      <!-- CHAT MESSAGES -->
+      <div id="chat"></div>
+
+      <!-- INPUT AREA -->
+      <div class="input-area">
+        <textarea
+          id="input"
+          placeholder="Type your message..."
+          rows="1"
+        ></textarea>
+
+        <button id="send" title="Send">➤</button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Main Script -->
+  <script src="/static/script.js"></script>
+
+  <!-- Username Guard (DOES NOT TOUCH UI) -->
+  <script>
+    // Agar user bina name ke aa gaya ho
+    if (!localStorage.getItem("username")) {
+      localStorage.setItem("username", "Guest");
+    }
+  </script>
 </body>
 </html>
