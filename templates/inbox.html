@@ -1,61 +1,39 @@
-<!DOCTYPE html>
+inbox: <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Inbox</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Personal AI</title>
+<link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body class="light">
+<div class="container">
 
-<div class="app">
-
-  <!-- ================= SIDEBAR ================= -->
-  <aside class="sidebar" id="sidebar">
-
+  <aside class="sidebar">
     <div class="sidebar-header">
-      <strong id="userName">User</strong>
+      <h3>Your Chats</h3>
       <button id="newChat">+</button>
     </div>
-
-    <div id="chatList">
-      <!-- chats yahan JS se add honge -->
-    </div>
-
+    <div id="history"></div>
   </aside>
 
-  <!-- ================= MAIN ================= -->
-  <main class="main">
+  <main class="chat-area">
+    <header class="top">
+      🤖 My Personal AI
+      <span id="themeToggle">🌞</span>
+    </header>
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      <button class="menu-btn" id="menuBtn">☰</button>
-      <button id="themeToggle">🌙</button>
+    <div id="chat"></div>
+
+    <div class="input-area">
+      <textarea id="input" placeholder="Type your message..."></textarea>
+      <button id="send">➤</button>
     </div>
-
-    <!-- CHAT AREA -->
-    <div class="chat" id="chatBox">
-      <div class="msg bot">
-        Hello 👋<br>
-        How can I help you?
-      </div>
-    </div>
-
-    <!-- INPUT -->
-    <div class="input-bar">
-      <textarea id="messageInput" placeholder="Type a message..."></textarea>
-      <button id="send">Send</button>
-    </div>
-
-    <!-- FOOTER -->
-    <div class="footer">
-      Chat system • Secure
-    </div>
-
   </main>
+
 </div>
 
-<script src="script.js"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
