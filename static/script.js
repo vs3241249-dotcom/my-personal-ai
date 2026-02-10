@@ -1,11 +1,27 @@
-const chatDiv = document.getElementById("chat");
-const input = document.getElementById("input");
+/* ================= ELEMENTS ================= */
+const chatDiv = document.getElementById("chatBox");
+const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("send");
-const historyDiv = document.getElementById("history");
+const historyDiv = document.getElementById("chatList");
 const newChatBtn = document.getElementById("newChat");
 const themeToggle = document.getElementById("themeToggle");
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const userNameLabel = document.getElementById("userName");
 const body = document.body;
 
+/* ================= USER NAME ================= */
+const savedName = localStorage.getItem("username");
+if (savedName) {
+  userNameLabel.textContent = savedName;
+}
+
+/* ================= SIDEBAR TOGGLE (MOBILE) ================= */
+menuBtn.onclick = () => {
+  sidebar.classList.toggle("open");
+};
+
+/* ================= DATA ================= */
 let chats = JSON.parse(localStorage.getItem("chats")) || [];
 let currentChatIndex = null;
 
@@ -32,13 +48,11 @@ function closeAllMenus() {
     m.style.display = "none";
   });
 }
-
 document.addEventListener("click", closeAllMenus);
 
 function createMenu(onCopy, onDelete) {
   const menu = document.createElement("div");
   menu.className = "inline-menu";
-  menu.style.display = "none";
   menu.innerHTML = `
     <div class="menu-item">📋 Copy</div>
     <div class="menu-item">🗑 Delete</div>
@@ -63,19 +77,17 @@ function toggleMenu(menu, btn) {
   closeAllMenus();
   menu.style.display = "block";
   menu.style.top = btn.offsetTop + btn.offsetHeight + "px";
- menu.style.right = "auto";
-menu.style.left = btn.offsetLeft + "px";
-
+  menu.style.left = btn.offsetLeft + "px";
 }
 
-/* ================= CHAT HISTORY ================= */
+/* ================= HISTORY ================= */
 function renderHistory() {
   historyDiv.innerHTML = "";
 
   chats.forEach((c, i) => {
     const row = document.createElement("div");
     row.className = "chat-title" + (i === currentChatIndex ? " active" : "");
-    row.textContent = `Chat ${i + 1}: ${c.title}`;
+    row.textContent = c.title || `Chat ${i + 1}`;
 
     const moreBtn = document.createElement("button");
     moreBtn.className = "more-btn";
@@ -99,12 +111,13 @@ function renderHistory() {
       toggleMenu(menu, moreBtn);
     };
 
-    row.onclick = (e) => {
-  if (e.target.classList.contains("more-btn")) return;
-  currentChatIndex = i;
-  renderChat();
-  renderHistory();
-};
+    row.onclick = e => {
+      if (e.target.classList.contains("more-btn")) return;
+      currentChatIndex = i;
+      renderChat();
+      renderHistory();
+      sidebar.classList.remove("open");
+    };
 
     row.appendChild(moreBtn);
     row.appendChild(menu);
@@ -120,10 +133,8 @@ function renderChat() {
   chats[currentChatIndex].messages.forEach((m, idx) => {
     const msg = document.createElement("div");
     msg.className = "msg " + m.role;
-    msg.style.position = "relative";
 
     const text = document.createElement("span");
-    text.className = "msg-text";
     text.textContent = m.text;
 
     const moreBtn = document.createElement("button");
@@ -159,16 +170,14 @@ newChatBtn.onclick = () => {
   chatDiv.innerHTML = "";
 };
 
-/* ================= SEND MESSAGE ================= */
+/* ================= INPUT ================= */
 function autoResize() {
   input.style.height = "auto";
   input.style.height = input.scrollHeight + "px";
 }
-
 input.addEventListener("input", autoResize);
 
 sendBtn.onclick = sendMessage;
-
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -176,6 +185,7 @@ input.addEventListener("keydown", e => {
   }
 });
 
+/* ================= SEND ================= */
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
@@ -198,14 +208,13 @@ function sendMessage() {
   chatDiv.appendChild(typing);
 
   fetch("/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    message: text,
-    name: localStorage.getItem("username") || "Guest"
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: text,
+      name: localStorage.getItem("username") || "Guest"
+    })
   })
-})
-
     .then(res => res.json())
     .then(data => {
       typing.remove();
@@ -220,26 +229,3 @@ function sendMessage() {
 
 /* ================= INIT ================= */
 renderHistory();
-// LOGIN SYSTEM
-const loginOverlay = document.getElementById("loginOverlay");
-const usernameInput = document.getElementById("usernameInput");
-
-function saveUsername() {
-  const name = usernameInput.value.trim();
-  if (!name) {
-    alert("Please enter your name");
-    return;
-  }
-  localStorage.setItem("username", name);
-  loginOverlay.style.display = "none";
-}
-
-// Check on load
-window.addEventListener("load", () => {
-  const user = localStorage.getItem("username");
-  if (user) {
-    loginOverlay.style.display = "none";
-  } else {
-    loginOverlay.style.display = "flex";
-  }
-});
