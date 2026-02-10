@@ -399,4 +399,27 @@ body.light .more-btn:hover {
     color: #ffffff;      /* pure white text */
   }
 }
+/* ================= FOOTER ================= */
+
+.app-footer {
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  padding: 8px 0;
+  color: #6b7280;
+  background: transparent;
+}
+
+/* Dark theme support */
+body.dark .app-footer {
+  color: #9ca3af;
+}
+
+/* Mobile safe */
+@media (max-width: 768px) {
+  .app-footer {
+    font-size: 12px;
+    padding-bottom: 10px;
+  }
+}
 
