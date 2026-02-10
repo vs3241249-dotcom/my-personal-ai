@@ -73,7 +73,7 @@ def chat():
                 "Content-Type": "application/json"
             },
             json={
-                "model": "openai/gpt-4o-mini",
+              "model": "mistralai/mistral-7b-instruct",
                 "messages": [
                     {"role": "system", "content": "Reply in simple Hindi-English mix."},
                     {"role": "user", "content": user_msg}
@@ -161,3 +161,4 @@ def export_csv():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
