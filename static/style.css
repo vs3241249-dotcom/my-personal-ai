@@ -300,4 +300,81 @@ body.dark .footer {
     font-size: 14px;
   }
 }
+/* ================= MOBILE VIEW FIX ================= */
+@media (max-width: 768px) {
+
+  /* App layout */
+  .app {
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* Sidebar → top horizontal scroll chats */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .sidebar-header {
+    display: none; /* mobile pe header hide */
+  }
+
+  #history {
+    display: flex;
+    gap: 6px;
+  }
+
+  .chat-title {
+    white-space: nowrap;
+    min-width: 120px;
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+
+  /* Main area */
+  .main {
+    flex: 1;
+    height: 100%;
+  }
+
+  /* Chat bubbles full width */
+  .msg {
+    max-width: 90%;
+    font-size: 14px;
+  }
+
+  /* Input bar fix */
+  .input-bar {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  textarea {
+    font-size: 14px;
+  }
+
+  button#send {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  /* 3-dot button always visible on mobile */
+  .more-btn {
+    opacity: 1 !important;
+  }
+
+  .msg.user .more-btn {
+    left: -20px;
+  }
+
+  .msg.bot .more-btn {
+    right: -20px;
+  }
+}
 
