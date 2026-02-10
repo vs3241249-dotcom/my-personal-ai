@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import pytz
 from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
 
 app = Flask(__name__)
 app.secret_key = "super-secret-key-change-this"
@@ -12,13 +13,29 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 MONGO_URI = os.getenv("MONGO_URI")
 
-# ---------------- MONGODB SETUP ----------------
-client = MongoClient(MONGO_URI)
-db = client["chatbot_db"]
-chats_col = db["chats"]
+# ---------------- MONGODB SAFE SETUP ----------------
+chats_col = None
+
+try:
+    client = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=5000,
+        tls=True,
+        tlsAllowInvalidCertificates=True
+    )
+    db = client["chatbot_db"]
+    chats_col = db["chats"]
+    client.server_info()  # test connection
+    print("MongoDB connected successfully")
+except ServerSelectionTimeoutError as e:
+    print("MongoDB connection failed:", e)
+    chats_col = None
 
 # ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg):
+    if chats_col is None:
+        return  # DB down ho to skip
+
     ist = pytz.timezone("Asia/Kolkata")
     now = datetime.now(ist).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -30,6 +47,9 @@ def save_chat(ip, role, msg):
     })
 
 def get_all_chats():
+    if chats_col is None:
+        return []
+
     rows = chats_col.find().sort("_id", -1)
     return [(r["ip"], r["role"], r["message"], r["time"]) for r in rows]
 
@@ -70,6 +90,7 @@ def chat():
         return jsonify({"reply": bot_reply})
 
     except Exception as e:
+        print("Chat error:", e)
         return jsonify({"reply": "Server error, baad me try karo"}), 500
 
 # ---------------- ADMIN LOGIN ----------------
@@ -106,6 +127,9 @@ def admin_logout():
 @app.route("/admin/search")
 def admin_search():
     if not session.get("admin"):
+        return jsonify([])
+
+    if chats_col is None:
         return jsonify([])
 
     q = request.args.get("q", "")
