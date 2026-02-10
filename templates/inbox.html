@@ -12,8 +12,8 @@
 <body class="light">
   <div class="container">
 
-    <!-- SIDEBAR (Desktop history) -->
-    <aside class="sidebar">
+    <!-- SIDEBAR (Desktop + Mobile History) -->
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h3>Your Chats</h3>
         <button id="newChat" title="New Chat">＋</button>
@@ -27,21 +27,23 @@
 
       <!-- TOP BAR -->
       <header class="top">
-        <div class="title">
-          🤖 My Personal AI
+        <div class="left">
+          <!-- Mobile menu (ONLY mobile via CSS) -->
+          <span class="mobile-menu" id="mobileMenu" title="Chats">☰</span>
+
+          <div class="title">
+            🤖 My Personal AI
+          </div>
         </div>
 
         <div class="actions">
           <!-- Theme Toggle -->
           <span id="themeToggle" title="Toggle Theme">🌞</span>
-
-          <!-- Mobile menu icon (CSS will handle visibility) -->
-          <span class="mobile-menu" id="mobileMenu">☰</span>
         </div>
       </header>
 
       <!-- CHAT MESSAGES -->
-      <div id="chat"></div>
+      <div id="chat" class="chat-messages"></div>
 
       <!-- INPUT AREA -->
       <div class="input-area">
@@ -60,9 +62,8 @@
   <!-- Main Script -->
   <script src="/static/script.js"></script>
 
-  <!-- Username Guard (DOES NOT TOUCH UI) -->
+  <!-- Username Guard (UI SAFE) -->
   <script>
-    // Agar user bina name ke aa gaya ho
     if (!localStorage.getItem("username")) {
       localStorage.setItem("username", "Guest");
     }
