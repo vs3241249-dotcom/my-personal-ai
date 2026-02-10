@@ -2,88 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- OWNERSHIP META (PROOF) -->
-  <meta name="author" content="Vaibhav">
-  <meta name="developer" content="Vaibhav - My Personal AI Platform">
-
   <title>My Personal AI</title>
   <link rel="stylesheet" href="/static/style.css" />
-
-  <!-- (OPTIONAL) Google Analytics – future use -->
-  <!--
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXX');
-  </script>
-  -->
 </head>
 
-<body class="light">
+<body class="light" onload="checkLogin()">
 
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <span>Your Chats</span>
-      <button id="newChat">+</button>
+  <!-- LOGIN POPUP -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <h2>🤖 Welcome to My Personal AI</h2>
+      <p>Enter your name to start chatting</p>
+      <input type="text" id="usernameInput" placeholder="Your name..." />
+      <button onclick="saveUsername()">Start Chat</button>
     </div>
-    <div id="history"></div>
-  </aside>
+  </div>
 
-  <!-- MAIN AREA -->
-  <main class="main">
+  <div class="app">
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      <span class="mobile-menu-btn" onclick="toggleSidebar()">☰</span>
-      <span>🤖 My Personal AI</span>
-      <button id="themeToggle">🌙</button>
-    </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span>Your Chats</span>
+        <button id="newChat">+</button>
+      </div>
+      <div id="history"></div>
+    </aside>
 
-    <!-- CHAT BOX -->
-    <div id="chat" class="chat"></div>
+    <!-- MAIN -->
+    <main class="main">
 
-    <!-- INPUT BOX -->
-    <div class="input-bar">
-      <textarea id="input" placeholder="Message My Personal AI..."></textarea>
-      <button id="send">▶</button>
-    </div>
+      <!-- TOP BAR -->
+      <div class="top-bar">
+        <span>🤖 My Personal AI</span>
+        <button id="themeToggle">🌙</button>
+      </div>
 
-  </main>
+      <!-- CHAT -->
+      <div id="chat" class="chat"></div>
 
-  <!-- MOBILE OVERLAY -->
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+      <!-- INPUT -->
+      <div class="input-bar">
+        <textarea id="input" placeholder="Message My Personal AI..."></textarea>
+        <button id="send">▶</button>
+      </div>
 
-</div>
+    </main>
+  </div>
 
-<!-- FOOTER (OWNERSHIP VISIBLE PROOF) -->
-<footer class="site-footer">
-  © <span id="year"></span> | Developed & Owned by <strong>Vaibhav</strong>
-</footer>
+  <!-- LOGIN SCRIPT -->
+  <script>
+    function saveUsername() {
+      const name = document.getElementById("usernameInput").value.trim();
+      if (!name) {
+        alert("Please enter your name");
+        return;
+      }
+      localStorage.setItem("username", name);
+      document.getElementById("loginOverlay").style.display = "none";
+    }
 
-<!-- JS -->
-<script>
-  function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
+    function checkLogin() {
+      const name = localStorage.getItem("username");
+      if (name) {
+        document.getElementById("loginOverlay").style.display = "none";
+      }
+    }
+  </script>
 
-    sidebar.classList.toggle("open");
-    overlay.classList.toggle("show");
-  }
-
-  // Auto year (safe)
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("year").textContent = new Date().getFullYear();
-  });
-</script>
-
-<script src="/static/script.js"></script>
-
+  <script src="/static/script.js"></script>
 </body>
 </html>
