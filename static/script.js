@@ -5,7 +5,7 @@ const historyDiv = document.getElementById("history");
 const newChatBtn = document.getElementById("newChat");
 const themeToggle = document.getElementById("themeToggle");
 const mobileMenu = document.getElementById("mobileMenu");
-const sidebar = document.querySelector(".sidebar");
+const sidebar = document.getElementById("sidebar");
 const body = document.body;
 
 /* ================= USER ================= */
@@ -29,17 +29,29 @@ themeToggle.onclick = () => {
 
 /* ================= MOBILE MENU ================= */
 if (mobileMenu) {
-  mobileMenu.onclick = () => {
-    sidebar.classList.toggle("show");
+  mobileMenu.onclick = e => {
+    e.stopPropagation();
+    sidebar.classList.toggle("open");
   };
 }
+
+/* Outside click -> close sidebar (mobile only) */
+document.addEventListener("click", e => {
+  if (
+    sidebar.classList.contains("open") &&
+    !sidebar.contains(e.target) &&
+    !mobileMenu.contains(e.target)
+  ) {
+    sidebar.classList.remove("open");
+  }
+});
 
 /* ================= SAVE ================= */
 function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
 }
 
-/* ================= MENU HELPERS ================= */
+/* ================= INLINE MENU HELPERS ================= */
 function closeAllMenus() {
   document.querySelectorAll(".inline-menu").forEach(m => {
     m.style.display = "none";
@@ -115,7 +127,7 @@ function renderHistory() {
       currentChatIndex = i;
       renderChat();
       renderHistory();
-      sidebar.classList.remove("show"); // mobile close
+      sidebar.classList.remove("open"); // mobile auto close
     };
 
     row.appendChild(moreBtn);
@@ -132,10 +144,8 @@ function renderChat() {
   chats[currentChatIndex].messages.forEach((m, idx) => {
     const msg = document.createElement("div");
     msg.className = "msg " + m.role;
-    msg.style.position = "relative";
 
     const text = document.createElement("span");
-    text.className = "msg-text";
     text.textContent = m.text;
 
     const moreBtn = document.createElement("button");
@@ -206,7 +216,7 @@ function sendMessage() {
   renderHistory();
 
   const typing = document.createElement("div");
-  typing.className = "msg bot typing";
+  typing.className = "msg bot";
   typing.textContent = "AI is typing...";
   chatDiv.appendChild(typing);
 
@@ -215,7 +225,7 @@ function sendMessage() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: text,
-      username: username   // 🔥 ADMIN KE LIYE IMPORTANT
+      username: username // 🔒 admin safe
     })
   })
     .then(res => res.json())
