@@ -96,23 +96,22 @@ function toggleMenu(menu, btn) {
   closeAllMenus();
 
   const rect = btn.getBoundingClientRect();
+  const menuWidth = 140;
+  const screenWidth = window.innerWidth;
+
   menu.style.display = "block";
   menu.style.position = "fixed";
   menu.style.top = rect.bottom + "px";
 
-  /* 🔥 SCREEN SAFE POSITION */
-  const menuWidth = 140; // approx width
-  const screenWidth = window.innerWidth;
-
   if (rect.right + menuWidth > screenWidth) {
-    // right edge case (USER MESSAGE)
-    menu.style.left = "auto";
-    menu.style.right = "8px";
+    /* USER MESSAGE (right side) */
+    menu.style.left = rect.right - menuWidth + "px";
   } else {
-    // normal (BOT MESSAGE)
-    menu.style.right = "auto";
+    /* BOT MESSAGE (left side) */
     menu.style.left = rect.left + "px";
   }
+
+  menu.style.right = "auto";
 }
 
 
