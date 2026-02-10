@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 🔒 MOBILE ZOOM OFF + SAFE VIEWPORT -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
   <title>My Personal AI</title>
 
   <!-- Main Styles -->
@@ -12,7 +16,8 @@
 <body class="light">
   <div class="container">
 
-    <!-- SIDEBAR (Desktop + Mobile History) -->
+    <!-- ================= SIDEBAR ================= -->
+    <!-- Desktop: always visible | Mobile: slide from left -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h3>Your Chats</h3>
@@ -22,14 +27,19 @@
       <div id="history"></div>
     </aside>
 
-    <!-- CHAT AREA -->
+    <!-- ================= CHAT AREA ================= -->
     <main class="chat-area">
 
-      <!-- TOP BAR -->
+      <!-- ===== TOP BAR ===== -->
       <header class="top">
         <div class="left">
-          <!-- Mobile menu (ONLY mobile via CSS) -->
-          <span class="mobile-menu" id="mobileMenu" title="Chats">☰</span>
+          <!-- ☰ Mobile menu (CSS controls visibility) -->
+          <span
+            class="mobile-menu"
+            id="mobileMenu"
+            title="Chats"
+            aria-label="Open chat history"
+          >☰</span>
 
           <div class="title">
             🤖 My Personal AI
@@ -38,31 +48,39 @@
 
         <div class="actions">
           <!-- Theme Toggle -->
-          <span id="themeToggle" title="Toggle Theme">🌞</span>
+          <span
+            id="themeToggle"
+            title="Toggle Theme"
+            aria-label="Toggle theme"
+          >🌞</span>
         </div>
       </header>
 
-      <!-- CHAT MESSAGES -->
+      <!-- ===== CHAT MESSAGES ===== -->
       <div id="chat" class="chat-messages"></div>
 
-      <!-- INPUT AREA -->
+      <!-- ===== INPUT AREA ===== -->
       <div class="input-area">
         <textarea
           id="input"
           placeholder="Type your message..."
           rows="1"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         ></textarea>
 
-        <button id="send" title="Send">➤</button>
+        <button id="send" title="Send" aria-label="Send message">➤</button>
       </div>
 
     </main>
   </div>
 
-  <!-- Main Script -->
+  <!-- ================= SCRIPT ================= -->
   <script src="/static/script.js"></script>
 
-  <!-- Username Guard (UI SAFE) -->
+  <!-- ================= USERNAME GUARD (UI SAFE) ================= -->
   <script>
     if (!localStorage.getItem("username")) {
       localStorage.setItem("username", "Guest");
