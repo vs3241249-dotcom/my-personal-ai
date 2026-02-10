@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
 
-  <!-- 🔒 MOBILE ZOOM OFF + SAFE VIEWPORT -->
+  <!-- 🔒 MOBILE SAFE VIEW -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -14,64 +14,56 @@
 </head>
 
 <body class="light">
-  <div class="container">
+
+  <!-- ================= LOGIN SCREEN ================= -->
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <h2>Login</h2>
+
+      <div class="field">
+        <input type="text" id="loginUsername" placeholder="Username or Email">
+      </div>
+
+      <div class="field password-field">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <span id="togglePassword">👁️</span>
+      </div>
+
+      <button id="loginBtn">Login</button>
+    </div>
+  </div>
+
+  <!-- ================= CHATBOT (UNCHANGED) ================= -->
+  <div class="container" id="chatApp">
 
     <!-- ================= SIDEBAR ================= -->
-    <!-- Desktop: always visible | Mobile: slide from left -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h3>Your Chats</h3>
         <button id="newChat" title="New Chat">＋</button>
       </div>
-
       <div id="history"></div>
     </aside>
 
     <!-- ================= CHAT AREA ================= -->
     <main class="chat-area">
 
-      <!-- ===== TOP BAR ===== -->
       <header class="top">
         <div class="left">
-          <!-- ☰ Mobile menu (CSS controls visibility) -->
-          <span
-            class="mobile-menu"
-            id="mobileMenu"
-            title="Chats"
-            aria-label="Open chat history"
-          >☰</span>
-
-          <div class="title">
-            🤖 My Personal AI
-          </div>
+          <span class="mobile-menu" id="mobileMenu">☰</span>
+          <div class="title">🤖 My Personal AI</div>
         </div>
 
         <div class="actions">
-          <!-- Theme Toggle -->
-          <span
-            id="themeToggle"
-            title="Toggle Theme"
-            aria-label="Toggle theme"
-          >🌞</span>
+          <span id="themeToggle">🌞</span>
         </div>
       </header>
 
-      <!-- ===== CHAT MESSAGES ===== -->
       <div id="chat" class="chat-messages"></div>
 
-      <!-- ===== INPUT AREA ===== -->
       <div class="input-area">
-        <textarea
-          id="input"
-          placeholder="Type your message..."
-          rows="1"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-        ></textarea>
-
-        <button id="send" title="Send" aria-label="Send message">➤</button>
+        <textarea id="input" placeholder="Type your message..." rows="1"></textarea>
+        <button id="send">➤</button>
       </div>
 
     </main>
@@ -80,11 +72,42 @@
   <!-- ================= SCRIPT ================= -->
   <script src="/static/script.js"></script>
 
-  <!-- ================= USERNAME GUARD (UI SAFE) ================= -->
+  <!-- ================= LOGIN LOGIC ================= -->
   <script>
-    if (!localStorage.getItem("username")) {
-      localStorage.setItem("username", "Guest");
+    const loginPage = document.getElementById("loginPage");
+    const chatApp = document.getElementById("chatApp");
+    const loginBtn = document.getElementById("loginBtn");
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("loginPassword");
+
+    // Password show / hide
+    togglePassword.addEventListener("click", () => {
+      const type = passwordInput.type === "password" ? "text" : "password";
+      passwordInput.type = type;
+      togglePassword.textContent = type === "password" ? "👁️" : "🙈";
+    });
+
+    // Hide chatbot first
+    chatApp.style.display = "none";
+
+    // Auto login check
+    if (localStorage.getItem("username")) {
+      loginPage.style.display = "none";
+      chatApp.style.display = "flex";
     }
+
+    // Login button
+    loginBtn.addEventListener("click", () => {
+      const username = document.getElementById("loginUsername").value.trim();
+      if (!username) {
+        alert("Please enter username");
+        return;
+      }
+      localStorage.setItem("username", username);
+      loginPage.style.display = "none";
+      chatApp.style.display = "flex";
+    });
   </script>
+
 </body>
 </html>
