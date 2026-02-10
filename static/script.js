@@ -241,47 +241,54 @@ function sendMessage() {
 
 /* ================= INIT ================= */
 renderHistory();
-/* ================= LOGIN UI LOGIC (SAFE ADD-ON) ================= */
+/* ================= LOGIN AUTH LOGIC ================= */
 
 const loginPage = document.getElementById("loginPage");
 const chatApp = document.getElementById("chatApp");
 const loginBtn = document.getElementById("loginBtn");
-const togglePassword = document.getElementById("togglePassword");
-const loginPassword = document.getElementById("loginPassword");
 const loginUsername = document.getElementById("loginUsername");
+const loginPassword = document.getElementById("loginPassword");
 
 /* Hide chatbot first */
-if (chatApp) chatApp.style.display = "none";
+chatApp.style.display = "none";
 
-/* Password show / hide */
-if (togglePassword && loginPassword) {
-  togglePassword.addEventListener("click", () => {
-    const type =
-      loginPassword.type === "password" ? "text" : "password";
-    loginPassword.type = type;
-    togglePassword.textContent =
-      type === "password" ? "👁️" : "🙈";
-  });
-}
+/* Get saved credentials */
+const savedUser = localStorage.getItem("auth_user");
+const savedPass = localStorage.getItem("auth_pass");
 
-/* Auto login */
-if (localStorage.getItem("username")) {
+/* Auto login only if credentials exist */
+if (savedUser && savedPass) {
   loginPage.style.display = "none";
   chatApp.style.display = "flex";
 }
 
-/* Login button */
-if (loginBtn) {
-  loginBtn.addEventListener("click", () => {
-    const username = loginUsername.value.trim();
-    if (!username) {
-      alert("Please enter username");
-      return;
-    }
+/* Login click */
+loginBtn.addEventListener("click", () => {
+  const u = loginUsername.value.trim();
+  const p = loginPassword.value.trim();
 
-    localStorage.setItem("username", username);
+  if (!u || !p) {
+    alert("Username & password required");
+    return;
+  }
+
+  /* FIRST TIME REGISTER */
+  if (!savedUser || !savedPass) {
+    localStorage.setItem("auth_user", u);
+    localStorage.setItem("auth_pass", p);
+    localStorage.setItem("username", u); // chatbot ke liye
+
     loginPage.style.display = "none";
     chatApp.style.display = "flex";
-  });
-}
+    return;
+  }
 
+  /* NORMAL LOGIN */
+  if (u === savedUser && p === savedPass) {
+    localStorage.setItem("username", u);
+    loginPage.style.display = "none";
+    chatApp.style.display = "flex";
+  } else {
+    alert("❌ Wrong username or password");
+  }
+});
