@@ -368,3 +368,15 @@ body.light .menu-item {
 body.light .menu-item:hover {
   background: rgba(0,0,0,0.06);
 }
+/* ===== LIGHT THEME MOBILE ICON CONTRAST FIX ===== */
+
+body.light .mobile-menu,
+body.light .more-btn {
+  color: #111827; /* dark gray */
+}
+
+body.light .mobile-menu:hover,
+body.light .more-btn:hover {
+  opacity: 0.85;
+}
+
