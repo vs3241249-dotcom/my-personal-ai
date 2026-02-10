@@ -6,7 +6,6 @@ const newChatBtn = document.getElementById("newChat");
 const themeToggle = document.getElementById("themeToggle");
 const body = document.body;
 
-/* ================= STORAGE ================= */
 let chats = JSON.parse(localStorage.getItem("chats")) || [];
 let currentChatIndex = null;
 
@@ -27,10 +26,13 @@ function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
 }
 
-/* ================= INLINE MENU ================= */
+/* ================= MENU HELPERS ================= */
 function closeAllMenus() {
-  document.querySelectorAll(".inline-menu").forEach(m => m.style.display = "none");
+  document.querySelectorAll(".inline-menu").forEach(m => {
+    m.style.display = "none";
+  });
 }
+
 document.addEventListener("click", closeAllMenus);
 
 function createMenu(onCopy, onDelete) {
@@ -61,10 +63,12 @@ function toggleMenu(menu, btn) {
   closeAllMenus();
   menu.style.display = "block";
   menu.style.top = btn.offsetTop + btn.offsetHeight + "px";
-  menu.style.left = btn.offsetLeft + "px";
+ menu.style.right = "auto";
+menu.style.left = btn.offsetLeft + "px";
+
 }
 
-/* ================= HISTORY ================= */
+/* ================= CHAT HISTORY ================= */
 function renderHistory() {
   historyDiv.innerHTML = "";
 
@@ -95,12 +99,12 @@ function renderHistory() {
       toggleMenu(menu, moreBtn);
     };
 
-    row.onclick = e => {
-      if (e.target.classList.contains("more-btn")) return;
-      currentChatIndex = i;
-      renderChat();
-      renderHistory();
-    };
+    row.onclick = (e) => {
+  if (e.target.classList.contains("more-btn")) return;
+  currentChatIndex = i;
+  renderChat();
+  renderHistory();
+};
 
     row.appendChild(moreBtn);
     row.appendChild(menu);
@@ -116,6 +120,7 @@ function renderChat() {
   chats[currentChatIndex].messages.forEach((m, idx) => {
     const msg = document.createElement("div");
     msg.className = "msg " + m.role;
+    msg.style.position = "relative";
 
     const text = document.createElement("span");
     text.className = "msg-text";
@@ -145,7 +150,7 @@ function renderChat() {
     chatDiv.appendChild(msg);
   });
 
-  scrollToBottom();
+  chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
 /* ================= NEW CHAT ================= */
@@ -154,14 +159,16 @@ newChatBtn.onclick = () => {
   chatDiv.innerHTML = "";
 };
 
-/* ================= SEND ================= */
+/* ================= SEND MESSAGE ================= */
 function autoResize() {
   input.style.height = "auto";
   input.style.height = input.scrollHeight + "px";
 }
+
 input.addEventListener("input", autoResize);
 
 sendBtn.onclick = sendMessage;
+
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -179,7 +186,6 @@ function sendMessage() {
   }
 
   chats[currentChatIndex].messages.push({ role: "user", text });
-
   input.value = "";
   autoResize();
   saveChats();
@@ -190,50 +196,50 @@ function sendMessage() {
   typing.className = "msg bot typing";
   typing.textContent = "AI is typing...";
   chatDiv.appendChild(typing);
-  scrollToBottom();
 
   fetch("/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: text,
-      name: "Guest User"
-    })
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    message: text,
+    name: localStorage.getItem("username") || "Guest"
   })
+})
+
     .then(res => res.json())
     .then(data => {
       typing.remove();
       chats[currentChatIndex].messages.push({
         role: "bot",
-        text: data.reply || "Something went wrong 😕"
+        text: data.reply
       });
       saveChats();
-      renderChat();
-    })
-    .catch(() => {
-      typing.remove();
-      chats[currentChatIndex].messages.push({
-        role: "bot",
-        text: "Server error. Please try again later."
-      });
       renderChat();
     });
 }
 
-/* ================= AUTO SCROLL ================= */
-function scrollToBottom() {
-  setTimeout(() => {
-    chatDiv.scrollTop = chatDiv.scrollHeight;
-  }, 50);
-}
-
-/* ================= MOBILE FIX ================= */
-window.addEventListener("resize", () => {
-  if (window.innerWidth < 768) scrollToBottom();
-});
-input.addEventListener("blur", () => {
-  if (window.innerWidth < 768) scrollToBottom();
-});
-
 /* ================= INIT ================= */
 renderHistory();
+// LOGIN SYSTEM
+const loginOverlay = document.getElementById("loginOverlay");
+const usernameInput = document.getElementById("usernameInput");
+
+function saveUsername() {
+  const name = usernameInput.value.trim();
+  if (!name) {
+    alert("Please enter your name");
+    return;
+  }
+  localStorage.setItem("username", name);
+  loginOverlay.style.display = "none";
+}
+
+// Check on load
+window.addEventListener("load", () => {
+  const user = localStorage.getItem("username");
+  if (user) {
+    loginOverlay.style.display = "none";
+  } else {
+    loginOverlay.style.display = "flex";
+  }
+});
