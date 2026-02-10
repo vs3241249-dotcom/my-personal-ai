@@ -22,18 +22,6 @@ themeToggle.onclick = () => {
   localStorage.setItem("theme", theme);
 };
 
-/* ================= DAILY LIMIT ================= */
-const LIMIT = 30;
-let today = new Date().toDateString();
-let savedDate = localStorage.getItem("msgDate");
-let msgCount = parseInt(localStorage.getItem("msgCount") || "0");
-
-if (savedDate !== today) {
-  msgCount = 0;
-  localStorage.setItem("msgDate", today);
-  localStorage.setItem("msgCount", "0");
-}
-
 /* ================= SAVE ================= */
 function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
@@ -185,19 +173,12 @@ function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  if (msgCount >= LIMIT) {
-    alert("Daily message limit reached. Try tomorrow 🙂");
-    return;
-  }
-
   if (currentChatIndex === null) {
     chats.push({ title: text.slice(0, 30), messages: [] });
     currentChatIndex = chats.length - 1;
   }
 
   chats[currentChatIndex].messages.push({ role: "user", text });
-  msgCount++;
-  localStorage.setItem("msgCount", msgCount);
 
   input.value = "";
   autoResize();
