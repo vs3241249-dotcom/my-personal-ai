@@ -241,3 +241,47 @@ function sendMessage() {
 
 /* ================= INIT ================= */
 renderHistory();
+/* ================= LOGIN UI LOGIC (SAFE ADD-ON) ================= */
+
+const loginPage = document.getElementById("loginPage");
+const chatApp = document.getElementById("chatApp");
+const loginBtn = document.getElementById("loginBtn");
+const togglePassword = document.getElementById("togglePassword");
+const loginPassword = document.getElementById("loginPassword");
+const loginUsername = document.getElementById("loginUsername");
+
+/* Hide chatbot first */
+if (chatApp) chatApp.style.display = "none";
+
+/* Password show / hide */
+if (togglePassword && loginPassword) {
+  togglePassword.addEventListener("click", () => {
+    const type =
+      loginPassword.type === "password" ? "text" : "password";
+    loginPassword.type = type;
+    togglePassword.textContent =
+      type === "password" ? "👁️" : "🙈";
+  });
+}
+
+/* Auto login */
+if (localStorage.getItem("username")) {
+  loginPage.style.display = "none";
+  chatApp.style.display = "flex";
+}
+
+/* Login button */
+if (loginBtn) {
+  loginBtn.addEventListener("click", () => {
+    const username = loginUsername.value.trim();
+    if (!username) {
+      alert("Please enter username");
+      return;
+    }
+
+    localStorage.setItem("username", username);
+    loginPage.style.display = "none";
+    chatApp.style.display = "flex";
+  });
+}
+
