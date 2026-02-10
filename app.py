@@ -13,19 +13,14 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 MONGO_URI = os.getenv("MONGO_URI")
 
-# ---------------- MONGODB SAFE SETUP ----------------
+# ---------------- MONGODB SETUP ----------------
 chats_col = None
 
 try:
-    client = MongoClient(
-        MONGO_URI,
-        serverSelectionTimeoutMS=5000,
-        tls=True,
-        tlsAllowInvalidCertificates=True
-    )
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     db = client["chatbot_db"]
     chats_col = db["chats"]
-    client.server_info()  # test connection
+    client.server_info()
     print("MongoDB connected successfully")
 except ServerSelectionTimeoutError as e:
     print("MongoDB connection failed:", e)
@@ -34,7 +29,7 @@ except ServerSelectionTimeoutError as e:
 # ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg):
     if chats_col is None:
-        return  # DB down ho to skip
+        return
 
     ist = pytz.timezone("Asia/Kolkata")
     now = datetime.now(ist).strftime("%Y-%m-%d %H:%M:%S")
@@ -73,9 +68,9 @@ def chat():
                 "Content-Type": "application/json"
             },
             json={
-              "model": "mistralai/mistral-7b-instruct",
+                "model": "openai/gpt-4o-mini",
                 "messages": [
-                    {"role": "system", "content": "Reply in simple Hindi-English mix."},
+                    {"role": "system", "content": "Reply normally like ChatGPT."},
                     {"role": "user", "content": user_msg}
                 ]
             },
@@ -161,4 +156,3 @@ def export_csv():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
