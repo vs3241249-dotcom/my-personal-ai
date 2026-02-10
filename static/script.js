@@ -27,15 +27,15 @@ themeToggle.onclick = () => {
   localStorage.setItem("theme", theme);
 };
 
-/* ================= MOBILE MENU ================= */
+/* ================= MOBILE SIDEBAR (☰) ================= */
 if (mobileMenu) {
-  mobileMenu.onclick = e => {
+  mobileMenu.addEventListener("click", e => {
     e.stopPropagation();
     sidebar.classList.toggle("open");
-  };
+  });
 }
 
-/* Outside click -> close sidebar (mobile only) */
+/* Outside click → close sidebar (MOBILE ONLY) */
 document.addEventListener("click", e => {
   if (
     sidebar.classList.contains("open") &&
@@ -51,14 +51,22 @@ function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
 }
 
-/* ================= INLINE MENU HELPERS ================= */
+/* ================= INLINE MENU (3 DOT) ================= */
 function closeAllMenus() {
-  document.querySelectorAll(".inline-menu").forEach(m => {
-    m.style.display = "none";
+  document.querySelectorAll(".inline-menu").forEach(menu => {
+    menu.style.display = "none";
   });
 }
 
-document.addEventListener("click", closeAllMenus);
+/* ❗ IMPORTANT: mobile-friendly close logic */
+document.addEventListener("click", e => {
+  if (
+    !e.target.closest(".more-btn") &&
+    !e.target.closest(".inline-menu")
+  ) {
+    closeAllMenus();
+  }
+});
 
 function createMenu(onCopy, onDelete) {
   const menu = document.createElement("div");
@@ -86,9 +94,12 @@ function createMenu(onCopy, onDelete) {
 
 function toggleMenu(menu, btn) {
   closeAllMenus();
+
+  const rect = btn.getBoundingClientRect();
   menu.style.display = "block";
-  menu.style.top = btn.offsetTop + btn.offsetHeight + "px";
-  menu.style.left = btn.offsetLeft + "px";
+  menu.style.position = "fixed";   // 🔥 mobile safe
+  menu.style.top = rect.bottom + "px";
+  menu.style.left = rect.left + "px";
 }
 
 /* ================= CHAT HISTORY ================= */
@@ -98,40 +109,15 @@ function renderHistory() {
   chats.forEach((c, i) => {
     const row = document.createElement("div");
     row.className = "chat-title" + (i === currentChatIndex ? " active" : "");
-    row.textContent = `Chat ${i + 1}: ${c.title}`;
+    row.textContent = `Chat ${i + 1}`;
 
-    const moreBtn = document.createElement("button");
-    moreBtn.className = "more-btn";
-    moreBtn.textContent = "⋮";
-
-    const menu = createMenu(
-      () => navigator.clipboard.writeText(c.title),
-      () => {
-        chats.splice(i, 1);
-        if (currentChatIndex === i) {
-          currentChatIndex = null;
-          chatDiv.innerHTML = "";
-        }
-        saveChats();
-        renderHistory();
-      }
-    );
-
-    moreBtn.onclick = e => {
-      e.stopPropagation();
-      toggleMenu(menu, moreBtn);
-    };
-
-    row.onclick = e => {
-      if (e.target.classList.contains("more-btn")) return;
+    row.onclick = () => {
       currentChatIndex = i;
       renderChat();
       renderHistory();
       sidebar.classList.remove("open"); // mobile auto close
     };
 
-    row.appendChild(moreBtn);
-    row.appendChild(menu);
     historyDiv.appendChild(row);
   });
 }
@@ -204,7 +190,7 @@ function sendMessage() {
   if (!text) return;
 
   if (currentChatIndex === null) {
-    chats.push({ title: text.slice(0, 30), messages: [] });
+    chats.push({ messages: [] });
     currentChatIndex = chats.length - 1;
   }
 
