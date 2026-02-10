@@ -240,6 +240,28 @@ body {
   overflow-y: auto;
   scrollbar-width: none;        /* Firefox */
 }
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 13px;
+  padding: 8px 12px;
+  opacity: 0.75;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+
+/* Dark mode */
+body.dark .footer {
+  border-top: 1px solid #1e293b;
+  color: #9ca3af;
+}
+
+/* Subtle hover glow */
+.footer:hover {
+  opacity: 1;
+}
+
 
 .chat::-webkit-scrollbar {
   display: none;                /* Chrome */
