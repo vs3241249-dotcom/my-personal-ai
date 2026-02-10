@@ -266,4 +266,38 @@ body.dark .footer {
 .chat::-webkit-scrollbar {
   display: none;                /* Chrome */
 }
+/* 📱 MOBILE FIX */
+@media (max-width: 768px) {
+
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    display: none;   /* 👈 hide sidebar on mobile */
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .top-bar {
+    justify-content: space-between;
+  }
+
+  .chat {
+    padding: 12px;
+  }
+
+  .msg {
+    max-width: 85%;
+    font-size: 14px;
+  }
+
+  .input-bar textarea {
+    font-size: 14px;
+  }
+}
 
