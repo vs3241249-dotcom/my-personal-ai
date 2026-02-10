@@ -399,27 +399,33 @@ body.light .more-btn:hover {
     color: #ffffff;      /* pure white text */
   }
 }
-/* ================= FOOTER ================= */
+/* ================= FOOTER (FINAL FIX) ================= */
 
 .app-footer {
   width: 100%;
   text-align: center;
   font-size: 13px;
-  padding: 8px 0;
+  padding: 6px 0;
   color: #6b7280;
   background: transparent;
+
+  /* 👇 IMPORTANT FIX */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  pointer-events: none;
 }
 
-/* Dark theme support */
+/* Dark theme */
 body.dark .app-footer {
   color: #9ca3af;
 }
 
-/* Mobile safe */
+/* Mobile */
 @media (max-width: 768px) {
   .app-footer {
     font-size: 12px;
-    padding-bottom: 10px;
   }
 }
-
