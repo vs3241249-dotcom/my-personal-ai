@@ -10,7 +10,7 @@ app.secret_key = "super-secret-key-change-this"
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-ADMIN_PASSWORD = "12345"   # 👈 apna strong password yahan set kar
+ADMIN_PASSWORD = "Vaibhav@1234"   # 👈 apna strong password yahan set kar
 
 import os
 
@@ -170,4 +170,5 @@ def export_csv():
 # ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
