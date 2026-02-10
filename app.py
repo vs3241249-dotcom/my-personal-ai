@@ -13,7 +13,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = "Vaibhav@1234"   # 👈 tumhara admin password
 
 # ---------------- MONGODB SETUP ----------------
-MONGO_URI = "mongodb+srv://vs3241249_db_user:Vaibhav@123@cluster0.u0oqjem.mongodb.net/?appName=Cluster0"
+MONGO_URI = os.getenv("MONGO_URI")   # 👈 Render env variable se lega
 
 client = MongoClient(MONGO_URI)
 db = client["chatbot_db"]
