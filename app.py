@@ -11,6 +11,7 @@ app.secret_key = "super-secret-key-change-this"
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+print("ADMIN_PASSWORD from ENV =", ADMIN_PASSWORD)
 MONGO_URI = os.getenv("MONGO_URI")
 
 # ---------------- MONGODB SETUP ----------------
@@ -156,3 +157,4 @@ def export_csv():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
