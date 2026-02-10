@@ -1,11 +1,17 @@
-script: const chatDiv = document.getElementById("chat");
+const chatDiv = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("send");
 const historyDiv = document.getElementById("history");
 const newChatBtn = document.getElementById("newChat");
 const themeToggle = document.getElementById("themeToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+const sidebar = document.querySelector(".sidebar");
 const body = document.body;
 
+/* ================= USER ================= */
+const username = localStorage.getItem("username") || "Guest";
+
+/* ================= STORAGE ================= */
 let chats = JSON.parse(localStorage.getItem("chats")) || [];
 let currentChatIndex = null;
 
@@ -20,6 +26,13 @@ themeToggle.onclick = () => {
   themeToggle.textContent = theme === "dark" ? "🌙" : "🌞";
   localStorage.setItem("theme", theme);
 };
+
+/* ================= MOBILE MENU ================= */
+if (mobileMenu) {
+  mobileMenu.onclick = () => {
+    sidebar.classList.toggle("show");
+  };
+}
 
 /* ================= SAVE ================= */
 function saveChats() {
@@ -63,9 +76,7 @@ function toggleMenu(menu, btn) {
   closeAllMenus();
   menu.style.display = "block";
   menu.style.top = btn.offsetTop + btn.offsetHeight + "px";
- menu.style.right = "auto";
-menu.style.left = btn.offsetLeft + "px";
-
+  menu.style.left = btn.offsetLeft + "px";
 }
 
 /* ================= CHAT HISTORY ================= */
@@ -99,12 +110,13 @@ function renderHistory() {
       toggleMenu(menu, moreBtn);
     };
 
-    row.onclick = (e) => {
-  if (e.target.classList.contains("more-btn")) return;
-  currentChatIndex = i;
-  renderChat();
-  renderHistory();
-};
+    row.onclick = e => {
+      if (e.target.classList.contains("more-btn")) return;
+      currentChatIndex = i;
+      renderChat();
+      renderHistory();
+      sidebar.classList.remove("show"); // mobile close
+    };
 
     row.appendChild(moreBtn);
     row.appendChild(menu);
@@ -159,7 +171,7 @@ newChatBtn.onclick = () => {
   chatDiv.innerHTML = "";
 };
 
-/* ================= SEND MESSAGE ================= */
+/* ================= INPUT ================= */
 function autoResize() {
   input.style.height = "auto";
   input.style.height = input.scrollHeight + "px";
@@ -176,6 +188,7 @@ input.addEventListener("keydown", e => {
   }
 });
 
+/* ================= SEND MESSAGE ================= */
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
@@ -200,7 +213,10 @@ function sendMessage() {
   fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: text })
+    body: JSON.stringify({
+      message: text,
+      username: username   // 🔥 ADMIN KE LIYE IMPORTANT
+    })
   })
     .then(res => res.json())
     .then(data => {
