@@ -248,7 +248,6 @@ if (username) {
   chatApp.style.display = "flex";
 }
 
-/* Login Click */
 loginBtn.addEventListener("click", async () => {
   const u = loginUsername.value.trim();
   const p = loginPassword.value.trim();
@@ -265,7 +264,16 @@ loginBtn.addEventListener("click", async () => {
       body: JSON.stringify({ username: u, password: p })
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    console.log("Login raw response:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      alert("Server response invalid");
+      return;
+    }
 
     if (data.success) {
       localStorage.setItem("username", data.username);
@@ -273,12 +281,13 @@ loginBtn.addEventListener("click", async () => {
 
       loginPage.style.display = "none";
       chatApp.style.display = "flex";
+      location.reload();
     } else {
-      alert(data.message);
+      alert(data.message || "Login failed");
     }
 
   } catch (err) {
-    console.error(err);
+    console.error("Login fetch error:", err);
     alert("Server error. Try again.");
   }
 });
