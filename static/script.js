@@ -1,4 +1,4 @@
- const chatDiv = document.getElementById("chat");
+const chatDiv = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("send");
 const historyDiv = document.getElementById("history");
@@ -9,7 +9,7 @@ const sidebar = document.getElementById("sidebar");
 const body = document.body;
 
 /* ================= USER ================= */
-const username = localStorage.getItem("username") || "Guest";
+let username = localStorage.getItem("username");
 
 /* ================= STORAGE ================= */
 let chats = JSON.parse(localStorage.getItem("chats")) || [];
@@ -27,7 +27,7 @@ themeToggle.onclick = () => {
   localStorage.setItem("theme", theme);
 };
 
-/* ================= MOBILE SIDEBAR (☰) ================= */
+/* ================= MOBILE SIDEBAR ================= */
 if (mobileMenu) {
   mobileMenu.addEventListener("click", e => {
     e.stopPropagation();
@@ -35,7 +35,6 @@ if (mobileMenu) {
   });
 }
 
-/* Outside click → close sidebar (MOBILE ONLY) */
 document.addEventListener("click", e => {
   if (
     sidebar.classList.contains("open") &&
@@ -51,19 +50,15 @@ function saveChats() {
   localStorage.setItem("chats", JSON.stringify(chats));
 }
 
-/* ================= INLINE MENU (3 DOT) ================= */
+/* ================= INLINE MENU ================= */
 function closeAllMenus() {
   document.querySelectorAll(".inline-menu").forEach(menu => {
     menu.style.display = "none";
   });
 }
 
-/* ❗ IMPORTANT: mobile-friendly close logic */
 document.addEventListener("click", e => {
-  if (
-    !e.target.closest(".more-btn") &&
-    !e.target.closest(".inline-menu")
-  ) {
+  if (!e.target.closest(".more-btn") && !e.target.closest(".inline-menu")) {
     closeAllMenus();
   }
 });
@@ -94,7 +89,6 @@ function createMenu(onCopy, onDelete) {
 
 function toggleMenu(menu, btn) {
   closeAllMenus();
-
   const rect = btn.getBoundingClientRect();
   const menuWidth = 140;
   const screenWidth = window.innerWidth;
@@ -104,16 +98,13 @@ function toggleMenu(menu, btn) {
   menu.style.top = rect.bottom + "px";
 
   if (rect.right + menuWidth > screenWidth) {
-    /* USER MESSAGE (right side) */
     menu.style.left = rect.right - menuWidth + "px";
   } else {
-    /* BOT MESSAGE (left side) */
     menu.style.left = rect.left + "px";
   }
 
   menu.style.right = "auto";
 }
-
 
 /* ================= CHAT HISTORY ================= */
 function renderHistory() {
@@ -128,7 +119,7 @@ function renderHistory() {
       currentChatIndex = i;
       renderChat();
       renderHistory();
-      sidebar.classList.remove("open"); // mobile auto close
+      sidebar.classList.remove("open");
     };
 
     historyDiv.appendChild(row);
@@ -200,7 +191,7 @@ input.addEventListener("keydown", e => {
 /* ================= SEND MESSAGE ================= */
 function sendMessage() {
   const text = input.value.trim();
-  if (!text) return;
+  if (!text || !username) return;
 
   if (currentChatIndex === null) {
     chats.push({ messages: [] });
@@ -224,7 +215,7 @@ function sendMessage() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: text,
-      username: username // 🔒 admin safe
+      username: username
     })
   })
     .then(res => res.json())
@@ -239,69 +230,63 @@ function sendMessage() {
     });
 }
 
-/* ================= INIT ================= */
-renderHistory();
-/* ================= LOGIN AUTH LOGIC ================= */
+/* ================= LOGIN SYSTEM ================= */
 
 const loginPage = document.getElementById("loginPage");
 const chatApp = document.getElementById("chatApp");
 const loginBtn = document.getElementById("loginBtn");
 const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
+const togglePassword = document.getElementById("togglePassword");
 
-/* Hide chatbot first */
 chatApp.style.display = "none";
 
-/* Get saved credentials */
-const savedUser = localStorage.getItem("auth_user");
-const savedPass = localStorage.getItem("auth_pass");
-
-/* Auto login only if credentials exist */
-if (savedUser && savedPass) {
+/* Auto login */
+if (username) {
   loginPage.style.display = "none";
   chatApp.style.display = "flex";
 }
 
 /* Login click */
-loginBtn.addEventListener("click", () => {
+loginBtn.addEventListener("click", async () => {
   const u = loginUsername.value.trim();
   const p = loginPassword.value.trim();
 
   if (!u || !p) {
-    alert("Username & password required");
+    alert("Please enter username and password");
     return;
   }
 
-  /* FIRST TIME REGISTER */
-  if (!savedUser || !savedPass) {
-    localStorage.setItem("auth_user", u);
-    localStorage.setItem("auth_pass", p);
-    localStorage.setItem("username", u); // chatbot ke liye
+  try {
+    const response = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: u, password: p })
+    });
 
-    loginPage.style.display = "none";
-    chatApp.style.display = "flex";
-    return;
-  }
+    const data = await response.json();
 
-  /* NORMAL LOGIN */
-  if (u === savedUser && p === savedPass) {
-    localStorage.setItem("username", u);
-    loginPage.style.display = "none";
-    chatApp.style.display = "flex";
-  } else {
-    alert("❌ Wrong username or password");
+    if (data.success) {
+      localStorage.setItem("username", data.username);
+      username = data.username;
+      loginPage.style.display = "none";
+      chatApp.style.display = "flex";
+    } else {
+      alert(data.message);
+    }
+
+  } catch (err) {
+    alert("Server error. Try again.");
   }
 });
-/* ================= PASSWORD SHOW / HIDE ================= */
 
-const togglePassword = document.getElementById("togglePassword");
-
-if (togglePassword && loginPassword) {
-  togglePassword.addEventListener("click", function () {
-    if (loginPassword.type === "password") {
-      loginPassword.type = "text";
-    } else {
-      loginPassword.type = "password";
-    }
+/* Password Toggle */
+if (togglePassword) {
+  togglePassword.addEventListener("click", () => {
+    loginPassword.type =
+      loginPassword.type === "password" ? "text" : "password";
   });
 }
+
+/* ================= INIT ================= */
+renderHistory();
