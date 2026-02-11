@@ -16,20 +16,22 @@ MONGO_URI = os.getenv("MONGO_URI")
 print("ADMIN_PASSWORD from ENV =", ADMIN_PASSWORD)
 
 # ---------------- MONGODB SETUP ----------------
+client = None
 chats_col = None
+users_col = None
 
 try:
     if MONGO_URI:
         client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
         db = client["chatbot_db"]
         chats_col = db["chats"]
+        users_col = db["users"]
         client.server_info()
         print("MongoDB connected successfully")
     else:
         print("MONGO_URI not set")
 except ServerSelectionTimeoutError as e:
     print("MongoDB connection failed:", e)
-    chats_col = None
 
 # ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg):
@@ -99,21 +101,29 @@ def chat():
 @app.route("/login", methods=["POST"])
 def login_user():
     try:
+        if not users_col:
+            return jsonify({
+                "success": False,
+                "message": "Database not connected"
+            }), 500
+
         data = request.get_json()
         name = data.get("username")
         password = data.get("password")
 
-        # Connect to users collection
-        user_col = client["chatbot_db"]["users"]
+        if not name or not password:
+            return jsonify({
+                "success": False,
+                "message": "Username and password required"
+            }), 400
 
-        # Check user exists
-        user = user_col.find_one({"username": name, "password": password})
+        user = users_col.find_one({"username": name, "password": password})
 
         if not user:
             return jsonify({
                 "success": False,
                 "message": "Wrong username or password"
-            }), 400
+            }), 401
 
         return jsonify({
             "success": True,
@@ -201,6 +211,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
