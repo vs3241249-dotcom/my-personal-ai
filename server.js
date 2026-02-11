@@ -18,20 +18,21 @@ mongoose
 app.use("/auth", authRoutes);
 
 // static files
-app.use("/static", express.static(path.join(__dirname, "static")));
+app.use("/static", express.static(path.join(__dirname, "../static")));
 
 // pages
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "templates", "admin_login.html"));
+  res.sendFile(path.join(__dirname, "../templates", "admin_login.html"));
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "templates", "admin_login.html"));
+  res.sendFile(path.join(__dirname, "../templates", "admin_login.html"));
 });
 
 app.get("/dashboard", (req, res) => {
-  res.sendFile(path.join(__dirname, "templates", "admin_dashboard.html"));
+  res.sendFile(path.join(__dirname, "../templates", "admin_dashboard.html"));
 });
+
 
 // server
 app.listen(3000, () => {
