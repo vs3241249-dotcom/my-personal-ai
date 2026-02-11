@@ -249,13 +249,13 @@ if (username) {
 }
 
 loginBtn.addEventListener("click", async () => {
+  console.log("Login button clicked");
+
   const u = loginUsername.value.trim();
   const p = loginPassword.value.trim();
 
-  if (!u || !p) {
-    alert("Please enter username and password");
-    return;
-  }
+  console.log("Username:", u);
+  console.log("Password:", p);
 
   try {
     const response = await fetch("/login", {
@@ -264,30 +264,30 @@ loginBtn.addEventListener("click", async () => {
       body: JSON.stringify({ username: u, password: p })
     });
 
+    console.log("Response status:", response.status);
+
     const text = await response.text();
-    console.log("Login raw response:", text);
+    console.log("Raw response:", text);
 
     let data;
     try {
       data = JSON.parse(text);
-    } catch {
+    } catch (e) {
+      console.log("JSON parse error", e);
       alert("Server response invalid");
       return;
     }
 
     if (data.success) {
+      alert("LOGIN SUCCESS ✅");
       localStorage.setItem("username", data.username);
-      username = data.username;
-
-      loginPage.style.display = "none";
-      chatApp.style.display = "flex";
       location.reload();
     } else {
-      alert(data.message || "Login failed");
+      alert("LOGIN FAILED ❌: " + data.message);
     }
 
   } catch (err) {
-    console.error("Login fetch error:", err);
+    console.error("Fetch error:", err);
     alert("Server error. Try again.");
   }
 });
