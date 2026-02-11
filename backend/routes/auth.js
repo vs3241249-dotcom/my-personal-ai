@@ -5,45 +5,62 @@ const bcrypt = require("bcryptjs");
 
 /* REGISTER */
 router.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
 
-  if (!username || !email || !password) {
-    return res.json({ success: false, message: "All fields required" });
+    if (!username || !email || !password) {
+      return res.json({ success: false, message: "All fields required" });
+    }
+
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.json({ success: false, message: "User already exists" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      username,
+      email,
+      password: hashed
+    });
+
+    await newUser.save();
+
+    res.json({ success: true, message: "Registered successfully" });
+
+  } catch (err) {
+    console.log("REGISTER ERROR:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
-
-  const existing = await User.findOne({ username });
-  if (existing) {
-    return res.json({ success: false, message: "User already exists" });
-  }
-
-  const hashed = await bcrypt.hash(password, 10);
-
-  const newUser = new User({
-    username,
-    email,
-    password: hashed
-  });
-
-  await newUser.save();
-
-  res.json({ success: true, message: "Registered successfully" });
 });
+
 
 /* LOGIN */
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-  const user = await User.findOne({ username });
-  if (!user) {
-    return res.json({ success: false, message: "User not found" });
+    if (!username || !password) {
+      return res.json({ success: false, message: "All fields required" });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.json({ success: false, message: "Wrong password" });
+    }
+
+    res.json({ success: true, username: user.username });
+
+  } catch (err) {
+    console.log("LOGIN ERROR:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
-
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) {
-    return res.json({ success: false, message: "Wrong password" });
-  }
-
-  res.json({ success: true, username: user.username });
 });
 
 module.exports = router;
