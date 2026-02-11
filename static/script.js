@@ -292,3 +292,16 @@ loginBtn.addEventListener("click", () => {
     alert("❌ Wrong username or password");
   }
 });
+/* ================= PASSWORD SHOW / HIDE ================= */
+
+const togglePassword = document.getElementById("togglePassword");
+
+if (togglePassword && loginPassword) {
+  togglePassword.addEventListener("click", function () {
+    if (loginPassword.type === "password") {
+      loginPassword.type = "text";
+    } else {
+      loginPassword.type = "password";
+    }
+  });
+}
