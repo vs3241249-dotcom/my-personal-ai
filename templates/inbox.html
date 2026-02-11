@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
 
-  <!-- 🔒 MOBILE SAFE VIEW -->
+  <!-- MOBILE SAFE VIEW -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -21,7 +21,7 @@
       <h2>Login</h2>
 
       <div class="field">
-        <input type="text" id="loginUsername" placeholder="Username or Email">
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
       </div>
 
       <div class="field password-field">
@@ -33,10 +33,10 @@
     </div>
   </div>
 
-  <!-- ================= CHATBOT (UNCHANGED) ================= -->
-  <div class="container" id="chatApp">
+  <!-- ================= CHATBOT UI ================= -->
+  <div class="container" id="chatApp" style="display:none;">
 
-    <!-- ================= SIDEBAR ================= -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h3>Your Chats</h3>
@@ -45,7 +45,7 @@
       <div id="history"></div>
     </aside>
 
-    <!-- ================= CHAT AREA ================= -->
+    <!-- MAIN CHAT AREA -->
     <main class="chat-area">
 
       <header class="top">
@@ -69,45 +69,8 @@
     </main>
   </div>
 
-  <!-- ================= SCRIPT ================= -->
+  <!-- MAIN SCRIPT -->
   <script src="/static/script.js"></script>
-
-  <!-- ================= LOGIN LOGIC ================= -->
-  <script>
-    const loginPage = document.getElementById("loginPage");
-    const chatApp = document.getElementById("chatApp");
-    const loginBtn = document.getElementById("loginBtn");
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("loginPassword");
-
-    // Password show / hide
-    togglePassword.addEventListener("click", () => {
-      const type = passwordInput.type === "password" ? "text" : "password";
-      passwordInput.type = type;
-      togglePassword.textContent = type === "password" ? "👁️" : "🙈";
-    });
-
-    // Hide chatbot first
-    chatApp.style.display = "none";
-
-    // Auto login check
-    if (localStorage.getItem("username")) {
-      loginPage.style.display = "none";
-      chatApp.style.display = "flex";
-    }
-
-    // Login button
-    loginBtn.addEventListener("click", () => {
-      const username = document.getElementById("loginUsername").value.trim();
-      if (!username) {
-        alert("Please enter username");
-        return;
-      }
-      localStorage.setItem("username", username);
-      loginPage.style.display = "none";
-      chatApp.style.display = "flex";
-    });
-  </script>
 
 </body>
 </html>
