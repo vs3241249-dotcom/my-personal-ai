@@ -294,3 +294,13 @@ if (togglePassword) {
 
 /* ================= INIT ================= */
 renderHistory();
+if (data.success) {
+  localStorage.setItem("username", data.username);
+  username = data.username;
+
+  loginPage.style.display = "none";
+  chatApp.style.display = "flex";
+
+  location.reload();   // 🔥 ADD THIS LINE
+}
+
