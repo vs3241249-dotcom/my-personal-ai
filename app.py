@@ -95,6 +95,37 @@ def chat():
     except Exception as e:
         print("Chat error:", e)
         return jsonify({"reply": "Server error, baad me try karo"}), 500
+# ---------------- USER LOGIN (FIX) ----------------
+@app.route("/login", methods=["POST"])
+def login_user():
+    try:
+        data = request.get_json()
+        name = data.get("username")
+        password = data.get("password")
+
+        # Connect to users collection
+        user_col = client["chatbot_db"]["users"]
+
+        # Check user exists
+        user = user_col.find_one({"username": name, "password": password})
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "Wrong username or password"
+            }), 400
+
+        return jsonify({
+            "success": True,
+            "username": name
+        })
+
+    except Exception as e:
+        print("Login Error:", e)
+        return jsonify({
+            "success": False,
+            "message": "Server error"
+        }), 500
 
 # ---------------- ADMIN LOGIN ----------------
 @app.route("/admin", methods=["GET", "POST"])
@@ -170,5 +201,6 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
