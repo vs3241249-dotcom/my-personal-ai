@@ -239,10 +239,10 @@ const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
 const togglePassword = document.getElementById("togglePassword");
 
-// Hide chat app by default
+// Hide chat app initially
 chatApp.style.display = "none";
 
-/* Auto login */
+// Auto login
 if (username) {
   loginPage.style.display = "none";
   chatApp.style.display = "flex";
@@ -290,6 +290,7 @@ if (togglePassword) {
       loginPassword.type === "password" ? "text" : "password";
   });
 }
+
 
 /* ================= INIT ================= */
 renderHistory();
