@@ -239,6 +239,7 @@ const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
 const togglePassword = document.getElementById("togglePassword");
 
+// Hide chat app by default
 chatApp.style.display = "none";
 
 /* Auto login */
@@ -247,7 +248,7 @@ if (username) {
   chatApp.style.display = "flex";
 }
 
-/* Login click */
+/* Login Click */
 loginBtn.addEventListener("click", async () => {
   const u = loginUsername.value.trim();
   const p = loginPassword.value.trim();
@@ -258,7 +259,7 @@ loginBtn.addEventListener("click", async () => {
   }
 
   try {
-    const response = await fetch("/auth/login", {
+    const response = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: u, password: p })
@@ -269,6 +270,7 @@ loginBtn.addEventListener("click", async () => {
     if (data.success) {
       localStorage.setItem("username", data.username);
       username = data.username;
+
       loginPage.style.display = "none";
       chatApp.style.display = "flex";
     } else {
@@ -276,6 +278,7 @@ loginBtn.addEventListener("click", async () => {
     }
 
   } catch (err) {
+    console.error(err);
     alert("Server error. Try again.");
   }
 });
