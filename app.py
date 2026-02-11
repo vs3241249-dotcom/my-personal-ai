@@ -7,22 +7,26 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 
 app = Flask(__name__)
-app.secret_key = "super-secret-key-change-this"
+app.secret_key = os.getenv("SECRET_KEY", "super-secret-key-change-this")
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
-print("ADMIN_PASSWORD from ENV =", ADMIN_PASSWORD)
 MONGO_URI = os.getenv("MONGO_URI")
+
+print("ADMIN_PASSWORD from ENV =", ADMIN_PASSWORD)
 
 # ---------------- MONGODB SETUP ----------------
 chats_col = None
 
 try:
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-    db = client["chatbot_db"]
-    chats_col = db["chats"]
-    client.server_info()
-    print("MongoDB connected successfully")
+    if MONGO_URI:
+        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        db = client["chatbot_db"]
+        chats_col = db["chats"]
+        client.server_info()
+        print("MongoDB connected successfully")
+    else:
+        print("MONGO_URI not set")
 except ServerSelectionTimeoutError as e:
     print("MongoDB connection failed:", e)
     chats_col = None
@@ -56,12 +60,13 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_msg = request.json.get("message")
-    user_ip = request.remote_addr
-
-    save_chat(user_ip, "user", user_msg)
-
     try:
+        data = request.get_json()
+        user_msg = data.get("message")
+        user_ip = request.remote_addr
+
+        save_chat(user_ip, "user", user_msg)
+
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -78,7 +83,9 @@ def chat():
             timeout=30
         )
 
+        res.raise_for_status()
         data = res.json()
+
         bot_reply = data["choices"][0]["message"]["content"]
 
         save_chat(user_ip, "bot", bot_reply)
@@ -96,9 +103,14 @@ def admin_login():
         return redirect("/admin/dashboard")
 
     error = None
+
     if request.method == "POST":
         pwd = request.form.get("password")
-        if pwd == ADMIN_PASSWORD:
+
+        # 🔥 SAFE CHECK (login crash nahi hoga)
+        if not ADMIN_PASSWORD:
+            error = "Admin password not configured on server"
+        elif pwd and pwd == ADMIN_PASSWORD:
             session["admin"] = True
             return redirect("/admin/dashboard")
         else:
@@ -157,4 +169,3 @@ def export_csv():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
