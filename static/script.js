@@ -230,7 +230,7 @@ function sendMessage() {
     });
 }
 
-/* ================= LOGIN SYSTEM ================= */
+/* ================= LOGIN / REGISTER SYSTEM ================= */
 
 const loginPage = document.getElementById("loginPage");
 const chatApp = document.getElementById("chatApp");
@@ -238,6 +238,12 @@ const loginBtn = document.getElementById("loginBtn");
 const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
 const togglePassword = document.getElementById("togglePassword");
+const loginError = document.getElementById("loginError");
+const switchModeBtn = document.getElementById("switchMode");
+const loginTitle = document.getElementById("loginTitle");
+const switchText = document.getElementById("switchText");
+
+let isRegisterMode = false;
 
 // Hide chat app initially
 chatApp.style.display = "none";
@@ -248,12 +254,38 @@ if (username) {
   chatApp.style.display = "flex";
 }
 
+switchModeBtn.addEventListener("click", () => {
+  isRegisterMode = !isRegisterMode;
+  loginError.textContent = "";
+
+  if (isRegisterMode) {
+    loginTitle.textContent = "Create Account";
+    loginBtn.textContent = "Register";
+    switchText.textContent = "Already have an account?";
+    switchModeBtn.textContent = "Login";
+  } else {
+    loginTitle.textContent = "Login";
+    loginBtn.textContent = "Login";
+    switchText.textContent = "New here?";
+    switchModeBtn.textContent = "Create account";
+  }
+});
+
 loginBtn.addEventListener("click", async () => {
   const u = loginUsername.value.trim();
   const p = loginPassword.value.trim();
 
+  loginError.textContent = "";
+
+  if (!u || !p) {
+    loginError.textContent = "Username and password required";
+    return;
+  }
+
+  const url = isRegisterMode ? "/register" : "/login";
+
   try {
-    const res = await fetch("/login", {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: u, password: p })
@@ -262,17 +294,27 @@ loginBtn.addEventListener("click", async () => {
     const data = await res.json();
 
     if (data.success) {
-      localStorage.setItem("username", data.username);
-      username = data.username;
-
-      loginPage.style.display = "none";
-      chatApp.style.display = "flex";
+      if (isRegisterMode) {
+        loginError.style.color = "#4caf50";
+        loginError.textContent = "Account created. Please login.";
+        isRegisterMode = false;
+        loginTitle.textContent = "Login";
+        loginBtn.textContent = "Login";
+        switchText.textContent = "New here?";
+        switchModeBtn.textContent = "Create account";
+      } else {
+        localStorage.setItem("username", data.username);
+        username = data.username;
+        loginPage.style.display = "none";
+        chatApp.style.display = "flex";
+      }
     } else {
-      alert(data.message || "Login failed");
+      loginError.style.color = "#ff4d4d";
+      loginError.textContent = data.message || "Invalid username or password";
     }
   } catch (err) {
-    console.error("Login error:", err);
-    alert("Server error");
+    console.error("Auth error:", err);
+    loginError.textContent = "Server error. Try again.";
   }
 });
 
