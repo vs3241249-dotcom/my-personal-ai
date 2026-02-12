@@ -115,6 +115,11 @@ RESPONSE STYLE:
 - Expand only if the user asks for more detail.
 - Avoid long unbroken paragraphs.
 - When explaining concepts, structure the answer clearly for readability.
+- Determine the complexity and intent of the question, not just its length.
+- Provide simple conversational replies for casual questions.
+- Provide clear, well-structured explanations for conceptual or educational questions.
+- Adjust depth based on how much understanding the user likely needs.
+
 GOAL:
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
 """
@@ -262,6 +267,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
