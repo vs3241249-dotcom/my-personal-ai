@@ -108,7 +108,6 @@ RESPONSE STYLE:
 - Keep paragraphs short (2–4 lines maximum).
 - Break long answers into small, easy-to-read sections.
 - Use bullet points only when explaining steps, lists, or comparisons.
-- Avoid large headings unless truly necessary.
 - Do not over-format or use excessive markdown.
 - Keep answers visually balanced and easy to scan.
 - Default responses should be concise but complete.
@@ -119,6 +118,9 @@ RESPONSE STYLE:
 - Provide simple conversational replies for casual questions.
 - Provide clear, well-structured explanations for conceptual or educational questions.
 - Adjust depth based on how much understanding the user likely needs.
+- Avoid raw markdown formatting like bold, underline, # headings, or backticks unless necessary.
+- Use clean readable structure instead of visible markdown syntax.
+- Use emojis naturally where helpful, but do not overuse them.
 
 GOAL:
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
@@ -267,6 +269,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
