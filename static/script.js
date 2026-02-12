@@ -10,6 +10,7 @@ const body = document.body;
 
 /* ================= USER ================= */
 let username = localStorage.getItem("username");
+if (!username) username = null;
 
 /* ================= STORAGE ================= */
 let chats = JSON.parse(localStorage.getItem("chats")) || [];
@@ -252,6 +253,7 @@ chatApp.style.display = "none";
 if (username) {
   loginPage.style.display = "none";
   chatApp.style.display = "flex";
+  renderHistory();
 }
 
 switchModeBtn.addEventListener("click", () => {
@@ -307,6 +309,7 @@ loginBtn.addEventListener("click", async () => {
         username = data.username;
         loginPage.style.display = "none";
         chatApp.style.display = "flex";
+        renderHistory();
       }
     } else {
       loginError.style.color = "#ff4d4d";
@@ -325,7 +328,3 @@ if (togglePassword) {
       loginPassword.type === "password" ? "text" : "password";
   });
 }
-
-
-
-/* ================= INIT ================= */
