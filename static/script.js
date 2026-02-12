@@ -136,8 +136,13 @@ function renderChat() {
     const msg = document.createElement("div");
     msg.className = "msg " + m.role;
 
-    const text = document.createElement("span");
-    text.textContent = m.text;
+  const text = document.createElement("span");
+
+if (m.role === "bot") {
+  text.innerHTML = marked.parse(m.text);
+} else {
+  text.textContent = m.text;
+}
 
     const moreBtn = document.createElement("button");
     moreBtn.className = "more-btn";
