@@ -99,7 +99,7 @@
 <div class="container">
 
   <div class="stats">
-    Total Messages: {{ chats|length }}
+    Total Messages: <span id="totalMessages">0</span>
   </div>
 
   <div class="search-box">
@@ -117,23 +117,48 @@
         <th>Date</th>
       </tr>
     </thead>
-    <tbody>
-      {% for chat in chats %}
-      <tr>
-        <td>{{ chat[0] }}</td>
-        <td>{{ chat[1] }}</td>
-        <td class="{{ chat[2] }}">{{ chat[2] }}</td>
-        <td>{{ chat[3] }}</td>
-        <td>{{ chat[4] }}</td>
-        <td>{{ chat[5] }}</td>
-      </tr>
-      {% endfor %}
+    <tbody id="tableBody">
     </tbody>
   </table>
 
 </div>
 
 <script>
+async function loadMessages() {
+  try {
+    const response = await fetch("/admin/messages");
+    const data = await response.json();
+
+    const tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "";
+
+    document.getElementById("totalMessages").innerText = data.length;
+
+    data.forEach(msg => {
+      const dateObj = new Date(msg.time);
+      const time = dateObj.toLocaleTimeString();
+      const date = dateObj.toLocaleDateString();
+
+      const row = `
+        <tr>
+          <td>${msg.ip || ""}</td>
+          <td>${msg.username || ""}</td>
+          <td class="${msg.role}">${msg.role}</td>
+          <td>${msg.message}</td>
+          <td>${time}</td>
+          <td>${date}</td>
+        </tr>
+      `;
+      tableBody.innerHTML += row;
+    });
+
+  } catch (error) {
+    console.error("Error loading messages:", error);
+  }
+}
+
+window.onload = loadMessages;
+
 document.getElementById("searchInput").addEventListener("input", function () {
   const value = this.value.toLowerCase();
   const rows = document.querySelectorAll("#chatTable tbody tr");
