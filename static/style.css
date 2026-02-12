@@ -544,3 +544,32 @@ body.light .more-btn:hover {
 .switch-text span:last-child:hover {
   text-decoration: underline;
 }
+/* ===== CHATGPT STYLE TEXT NORMALIZATION ===== */
+
+.msg.bot h1,
+.msg.bot h2,
+.msg.bot h3,
+.msg.bot h4 {
+  font-size: 15px !important;
+  font-weight: 600;
+  margin: 6px 0;
+}
+
+.msg.bot p {
+  font-size: 15px;
+  margin: 4px 0;
+  line-height: 1.5;
+}
+
+.msg.bot strong {
+  font-weight: 600;
+}
+
+.msg.bot ul {
+  padding-left: 18px;
+  margin: 4px 0;
+}
+
+.msg.bot li {
+  margin: 2px 0;
+}
