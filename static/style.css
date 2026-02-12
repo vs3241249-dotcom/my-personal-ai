@@ -548,8 +548,8 @@ body.light .more-btn:hover {
 /* ===== CLEAN CHATGPT STYLE ===== */
 
 .msg {
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .msg.bot h1,
@@ -558,13 +558,13 @@ body.light .more-btn:hover {
 .msg.bot h4,
 .msg.bot h5,
 .msg.bot h6 {
-  font-size: 14px !important;
-  font-weight: 600;
-  margin: 4px 0;
+font-size: 15px !important;
+font-weight: 600;
+margin: 6px 0 4px 0;
 }
 
 .msg.bot p {
-  margin: 4px 0;
+  margin: 6px 0;
 }
 
 .msg.bot ul,
