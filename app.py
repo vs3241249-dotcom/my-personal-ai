@@ -26,54 +26,64 @@ try:
         chats_col = db["chats"]
         users_col = db["users"]
         client.server_info()
-        print("MongoDB connected successfully")
+        print("✅ MongoDB connected")
     else:
-        print("MONGO_URI not set")
-except Exception as e:
-    print("MongoDB connection failed:", e)
+        print("⚠️ MONGO_URI not set")
+except ServerSelectionTimeoutError as e:
+    print("❌ MongoDB connection failed:", e)
 
 # ---------------- HELPERS ----------------
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
-# ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg, username=None):
     if chats_col is None:
         return
-    try:
-        ist = pytz.timezone("Asia/Kolkata")
-        now = datetime.now(ist)
 
-        chats_col.insert_one({
-            "ip": ip,
-            "username": username if username else "Guest",
-            "role": role,
-            "message": msg,
-            "time": now.strftime("%H:%M:%S"),
-            "date": now.strftime("%Y-%m-%d")
-        })
-    except Exception as e:
-        print("Save chat error:", e)
+    ist = pytz.timezone("Asia/Kolkata")
+    now = datetime.now(ist)
 
-# ---------------- MEMORY ----------------
+    chats_col.insert_one({
+        "ip": ip,
+        "username": username if username else "Guest",
+        "role": role,
+        "message": msg,
+        "time": now.strftime("%H:%M:%S"),
+        "date": now.strftime("%Y-%m-%d")
+    })
+
 def get_recent_messages(ip, limit=6):
     if chats_col is None:
         return []
-    try:
-        rows = list(
-            chats_col.find({"ip": ip})
-            .sort("_id", -1)
-            .limit(limit)
-        )
-        rows.reverse()
-        return [
-            {"role": r.get("role"), "content": r.get("message")}
-            for r in rows
-            if r.get("message")
-        ]
-    except Exception as e:
-        print("Memory error:", e)
+
+    rows = list(
+        chats_col.find({"ip": ip})
+        .sort("_id", -1)
+        .limit(limit)
+    )
+    rows.reverse()
+
+    return [
+        {"role": r["role"], "content": r["message"]}
+        for r in rows
+    ]
+
+def get_all_chats():
+    if chats_col is None:
         return []
+
+    rows = chats_col.find().sort("_id", -1)
+    return [
+        (
+            r.get("ip"),
+            r.get("username", "Guest"),
+            r.get("role"),
+            r.get("message"),
+            r.get("time"),
+            r.get("date", "")
+        )
+        for r in rows
+    ]
 
 # ---------------- HOME ----------------
 @app.route("/")
@@ -84,74 +94,71 @@ def home():
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
+        if not OPENROUTER_API_KEY:
+            return jsonify({"reply": "AI service not configured"}), 500
+
         data = request.get_json(force=True)
-        user_msg = (data.get("message") or "").strip()
+        user_msg = data.get("message", "").strip()
         username = data.get("username", "Guest")
         user_ip = request.remote_addr
 
         if not user_msg:
-            return jsonify({"reply": "Please type a message."})
+            return jsonify({"reply": "Message empty hai"}), 400
 
         save_chat(user_ip, "user", user_msg, username)
 
-        # Load memory
         conversation_history = get_recent_messages(user_ip)
 
-        system_prompt = """
+        messages = [
+            {
+                "role": "system",
+                "content": """
 You are a smart AI assistant like ChatGPT.
 
 Rules:
-- Reply in the SAME language as the user.
-- Keep answers short, clear and easy to understand.
-- Do NOT write long essays unless user asks.
-- Use simple words.
-- Break long answers into small readable parts.
+- Reply in the same language as user.
+- Keep answers short, clear and natural.
+- Avoid long essays unless user asks.
 - Use bullet points when helpful.
-- Be natural and human-like.
+- Make response easy to understand.
+- Sound human and friendly.
 """
+            }
+        ]
 
-        messages = [{"role": "system", "content": system_prompt}]
         messages.extend(conversation_history)
         messages.append({"role": "user", "content": user_msg})
 
-        if not OPENROUTER_API_KEY:
-            return jsonify({"reply": "AI not configured properly."})
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://yourapp.onrender.com",
+                "X-Title": "My Personal AI",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "openai/gpt-4o-mini",
+                "messages": messages,
+                "max_tokens": 400,
+                "temperature": 0.7
+            },
+            timeout=30
+        )
 
-        try:
-            res = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "openai/gpt-4o-mini",
-                    "messages": messages,
-                    "max_tokens": 400,
-                    "temperature": 0.7
-                },
-                timeout=30
-            )
+        if response.status_code != 200:
+            print("AI ERROR:", response.text)
+            return jsonify({"reply": "AI temporarily busy, try again"}), 500
 
-            response_data = res.json()
-
-            if "choices" not in response_data:
-                print("API ERROR:", response_data)
-                return jsonify({"reply": "AI temporarily unavailable. Try again."})
-
-            bot_reply = response_data["choices"][0]["message"]["content"]
-
-        except Exception as api_error:
-            print("API CALL ERROR:", api_error)
-            return jsonify({"reply": "AI service error. Please try again."})
+        bot_reply = response.json()["choices"][0]["message"]["content"]
 
         save_chat(user_ip, "bot", bot_reply, username)
 
         return jsonify({"reply": bot_reply})
 
     except Exception as e:
-        print("CHAT ERROR:", e)
-        return jsonify({"reply": "Server error, please try again."})
+        print("Chat error:", e)
+        return jsonify({"reply": "Server error, please try again"}), 500
 
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["POST"])
@@ -160,9 +167,9 @@ def register_user():
         if users_col is None:
             return jsonify({"success": False}), 500
 
-        data = request.get_json(force=True)
-        name = (data.get("username") or "").strip()
-        password = (data.get("password") or "").strip()
+        data = request.get_json()
+        name = data.get("username", "").strip()
+        password = data.get("password", "").strip()
 
         if not name or not password:
             return jsonify({"success": False}), 400
@@ -176,6 +183,7 @@ def register_user():
         })
 
         return jsonify({"success": True})
+
     except:
         return jsonify({"success": False}), 500
 
@@ -186,15 +194,19 @@ def login_user():
         if users_col is None:
             return jsonify({"success": False}), 500
 
-        data = request.get_json(force=True)
-        name = (data.get("username") or "").strip()
-        password = (data.get("password") or "").strip()
+        data = request.get_json()
+        name = data.get("username", "").strip()
+        password = data.get("password", "").strip()
 
         user = users_col.find_one({"username": name})
-        if user and user.get("password") == hash_pw(password):
+        if not user:
+            return jsonify({"success": False}), 401
+
+        if user["password"] == hash_pw(password):
             return jsonify({"success": True, "username": name})
 
         return jsonify({"success": False}), 401
+
     except:
         return jsonify({"success": False}), 500
 
@@ -205,9 +217,13 @@ def admin_login():
         return redirect("/admin/dashboard")
 
     error = None
+
     if request.method == "POST":
         pwd = request.form.get("password")
-        if ADMIN_PASSWORD and pwd == ADMIN_PASSWORD:
+
+        if not ADMIN_PASSWORD:
+            error = "Admin password not set"
+        elif pwd == ADMIN_PASSWORD:
             session["admin"] = True
             return redirect("/admin/dashboard")
         else:
@@ -220,19 +236,7 @@ def admin_dashboard():
     if not session.get("admin"):
         return redirect("/admin")
 
-    rows = chats_col.find().sort("_id", -1) if chats_col else []
-    chats = [
-        (
-            r.get("ip"),
-            r.get("username", "Guest"),
-            r.get("role"),
-            r.get("message"),
-            r.get("time"),
-            r.get("date")
-        )
-        for r in rows
-    ]
-
+    chats = get_all_chats()
     return render_template("admin_dashboard.html", chats=chats)
 
 @app.route("/admin/logout")
