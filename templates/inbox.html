@@ -15,10 +15,10 @@
 
 <body class="light">
 
-  <!-- ================= LOGIN SCREEN ================= -->
+  <!-- ================= LOGIN / REGISTER SCREEN ================= -->
   <div id="loginPage" class="login-page">
     <div class="login-card">
-      <h2>Login</h2>
+      <h2 id="loginTitle">Login</h2>
 
       <div class="field">
         <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
@@ -29,7 +29,14 @@
         <span id="togglePassword">👁️</span>
       </div>
 
+      <div id="loginError" class="login-error"></div>
+
       <button id="loginBtn">Login</button>
+
+      <p class="switch-text">
+        <span id="switchText">New here?</span>
+        <span id="switchMode">Create account</span>
+      </p>
     </div>
   </div>
 
