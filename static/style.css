@@ -516,3 +516,31 @@ body.light .more-btn:hover {
     font-size: 22px;
   }
 }
+/* ================= LOGIN ERROR & SWITCH ================= */
+
+.login-error {
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+  text-align: center;
+  min-height: 18px;
+}
+
+.switch-text {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.switch-text span:last-child {
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.switch-text span:last-child:hover {
+  text-decoration: underline;
+}
