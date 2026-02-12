@@ -101,12 +101,11 @@ def chat():
 @app.route("/login", methods=["POST"])
 def login_user():
     try:
-        if not users_col:
+        if users_col is None:
             return jsonify({
                 "success": False,
                 "message": "Database not connected"
             }), 500
-
         data = request.get_json()
         name = data.get("username")
         password = data.get("password")
@@ -211,6 +210,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
