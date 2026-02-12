@@ -104,7 +104,6 @@ LANGUAGE:
 - Use natural, simple and human-like wording.
 
 RESPONSE STYLE:
--RESPONSE STYLE:
 - Reply in a clean, natural conversational style like modern ChatGPT.
 - Keep paragraphs short (2–4 lines maximum).
 - Break long answers into small, easy-to-read sections.
@@ -114,7 +113,8 @@ RESPONSE STYLE:
 - Keep answers visually balanced and easy to scan.
 - Default responses should be concise but complete.
 - Expand only if the user asks for more detail.
-
+- Avoid long unbroken paragraphs.
+- When explaining concepts, structure the answer clearly for readability.
 GOAL:
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
 """
@@ -262,6 +262,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
