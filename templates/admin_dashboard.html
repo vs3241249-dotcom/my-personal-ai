@@ -6,7 +6,7 @@
   <style>
     body {
       background: #0b1220;
-      color: #fff;
+      color: #ffffff;
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
@@ -52,6 +52,7 @@
     td {
       padding: 10px;
       border-bottom: 1px solid #1f2937;
+      word-break: break-word;
     }
 
     tr:hover {
@@ -71,9 +72,17 @@
     .stats {
       margin-bottom: 15px;
       font-size: 14px;
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
+    a {
+      color: white;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -82,58 +91,49 @@
 <header>
   📊 Admin Dashboard
   <div>
-    <a href="#" style="color:white;text-decoration:none;">⬇ Export CSV</a> |
-    <a href="/login" style="color:white;text-decoration:none;">Logout</a>
+    <a href="/admin/export">⬇ Export CSV</a> |
+    <a href="/admin/logout">Logout</a>
   </div>
 </header>
 
 <div class="container">
 
   <div class="stats">
-    Total Messages: <span id="totalCount">0</span>
+    Total Messages: {{ chats|length }}
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search by message or IP...">
+    <input type="text" id="searchInput" placeholder="Search by IP, Username or Message...">
   </div>
 
   <table id="chatTable">
     <thead>
       <tr>
         <th>IP</th>
+        <th>Username</th>
         <th>Role</th>
         <th>Message</th>
         <th>Time</th>
+        <th>Date</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+      {% for chat in chats %}
+      <tr>
+        <td>{{ chat[0] }}</td>
+        <td>{{ chat[1] }}</td>
+        <td class="{{ chat[2] }}">{{ chat[2] }}</td>
+        <td>{{ chat[3] }}</td>
+        <td>{{ chat[4] }}</td>
+        <td>{{ chat[5] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 
 </div>
 
 <script>
-async function loadChats() {
-  const res = await fetch("/admin/messages"); // same backend route
-  const data = await res.json();
-
-  const tbody = document.querySelector("#chatTable tbody");
-  tbody.innerHTML = "";
-
-  document.getElementById("totalCount").innerText = data.length;
-
-  data.forEach(chat => {
-    const row = `
-      <tr>
-        <td>${chat.ip}</td>
-        <td class="${chat.role}">${chat.role}</td>
-        <td>${chat.message}</td>
-        <td>${new Date(chat.time).toLocaleString()}</td>
-      </tr>
-    `;
-    tbody.innerHTML += row;
-  });
-}
-
 document.getElementById("searchInput").addEventListener("input", function () {
   const value = this.value.toLowerCase();
   const rows = document.querySelectorAll("#chatTable tbody tr");
@@ -142,8 +142,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
     row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
   });
 });
-
-loadChats();
 </script>
 
 </body>
