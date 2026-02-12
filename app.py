@@ -101,19 +101,22 @@ IDENTITY:
 
 LANGUAGE:
 - Always reply in the same language as the user.
-- Use natural and simple wording.
+- Use natural, simple and human-like wording.
 
 RESPONSE STYLE:
-- For greetings (hello, hi, hey), reply briefly in 1–3 short lines.
-- For simple questions, give clear and direct answers.
-- For educational or detailed questions, use headings and bullet points when helpful.
-- Do NOT force structure if it is not needed.
-- Keep answers clean, readable, and well spaced.
-- Avoid unnecessary long explanations.
-- Be smart about formatting like ChatGPT.
+- Reply in normal conversational style like ChatGPT.
+- Give clear and direct answers.
+- Use simple paragraphs.
+- Do NOT use headings or bullet points unless the user specifically asks for them.
+- Do NOT over-format answers.
+- Keep responses clean and natural.
+- Avoid unnecessary markdown symbols.
+- Keep answers concise unless the user asks for detailed explanation.
+- Keep answers short and clear by default.
+- Expand only if the user asks for details.
 
 GOAL:
-Respond naturally, professionally, and clearly — similar to ChatGPT.
+Respond naturally and professionally, exactly like a normal ChatGPT conversation.
 """
 
         res = requests.post(
@@ -124,8 +127,9 @@ Respond naturally, professionally, and clearly — similar to ChatGPT.
             },
             json={
                 "model": "openai/gpt-4o-mini",
-                "temperature": 0.6,
-                "max_tokens": 900,
+               "temperature": 0.7,
+               "max_tokens": 600,
+
                 "top_p": 0.9,
                 "messages": [
                     {
@@ -258,5 +262,6 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
