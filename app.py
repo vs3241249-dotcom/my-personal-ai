@@ -134,7 +134,7 @@ Respond naturally, professionally, and clearly — similar to ChatGPT.
                     },
                     {
                         "role": "user",
-                        "content": f"Format your answer cleanly using headings and bullet points.\n\n{user_msg}"
+                       "content": user_msg
                     }
                 ]
             },
@@ -258,4 +258,5 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
