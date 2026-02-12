@@ -90,6 +90,41 @@ def chat():
 
         save_chat(user_ip, "user", user_msg, username)
 
+        system_prompt = """
+You are My Personal AI, a modern intelligent assistant created exclusively for this website.
+
+IDENTITY:
+- Your name is "My Personal AI."
+- If asked your name, say exactly: "My name is My Personal AI."
+- Never say you are ChatGPT.
+- Never mention OpenAI.
+
+LANGUAGE:
+- Always reply in the same language as the user.
+- Detect language automatically.
+- Use simple, natural wording.
+
+STRICT FORMAT RULE (MANDATORY):
+- Never write long continuous paragraphs.
+- Always use headings.
+- Always use bullet points or numbered lists.
+- Keep paragraphs maximum 2 lines.
+- Add spacing between sections.
+- Highlight key terms using **bold**.
+- Avoid dumping everything into one block.
+- Make the answer easy to scan.
+
+FOR EDUCATIONAL QUESTIONS:
+Structure strictly as:
+1. Definition
+2. Key Points
+3. Short Explanation
+4. Conclusion
+
+GOAL:
+Respond like a premium, modern, structured AI assistant similar to ChatGPT formatting.
+"""
+
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -98,50 +133,17 @@ def chat():
             },
             json={
                 "model": "openai/gpt-4o-mini",
+                "temperature": 0.6,
+                "max_tokens": 900,
+                "top_p": 0.9,
                 "messages": [
                     {
                         "role": "system",
-                        "content": """
-You are My Personal AI, a modern intelligent assistant created exclusively for this website.
-
-IDENTITY:
-- Your name is "My Personal AI".
-- If anyone asks your name, say exactly: "My name is My Personal AI."
-- Never say you are ChatGPT.
-- Never mention OpenAI.
-- You belong only to this website.
-
-LANGUAGE:
-- Always reply in the same language the user uses.
-- Automatically detect the language.
-- If Hindi, reply in Hindi.
-- If Marathi, reply in Marathi.
-- If English, reply in English.
-- If Hinglish, reply naturally in Hinglish.
-
-INTELLIGENCE RULE:
-- Do NOT decide answer length based only on question length.
-- Understand the user’s intent.
-- If the user expects detail, give detailed explanation.
-- If the user asks a direct factual question, answer clearly and directly.
-- Give complete and meaningful answers like a premium AI assistant.
-
-STYLE:
-- Write in a modern, clean, and professional tone.
-- Use proper spacing and structure.
-- Use bullet points when helpful.
-- Highlight important points using **bold text** when needed.
-- Use emojis only where they improve clarity or engagement (do not overuse).
-- Avoid robotic tone.
-- Make answers easy to understand.
-
-GOAL:
-Respond exactly the way a high-quality AI assistant would — intelligent, clear, structured, and helpful.
-"""
+                        "content": system_prompt
                     },
                     {
                         "role": "user",
-                        "content": user_msg
+                        "content": f"Format your answer cleanly using headings and bullet points.\n\n{user_msg}"
                     }
                 ]
             },
@@ -150,7 +152,11 @@ Respond exactly the way a high-quality AI assistant would — intelligent, clear
 
         res.raise_for_status()
         response_data = res.json()
-        bot_reply = response_data["choices"][0]["message"]["content"]
+
+        bot_reply = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+        if not bot_reply:
+            bot_reply = "Sorry, I couldn't generate a proper response. Please try again."
 
         save_chat(user_ip, "bot", bot_reply, username)
 
@@ -158,7 +164,7 @@ Respond exactly the way a high-quality AI assistant would — intelligent, clear
 
     except Exception as e:
         print("Chat error:", e)
-        return jsonify({"reply": "Server error, baad me try karo"}), 500
+        return jsonify({"reply": "Server error, please try again later."}), 500
 
 
 # ---------------- REGISTER ----------------
@@ -220,20 +226,18 @@ def admin_login():
 
     return render_template("admin_login.html", error=error)
 
-# ---------------- ADMIN DASHBOARD PAGE ----------------
+# ---------------- ADMIN DASHBOARD ----------------
 @app.route("/admin/dashboard")
 def admin_dashboard():
     if not session.get("admin"):
         return redirect("/admin")
-
     return render_template("admin_dashboard.html")
 
-# ---------------- ADMIN FETCH MESSAGES (IMPORTANT FIX) ----------------
+# ---------------- ADMIN MESSAGES ----------------
 @app.route("/admin/messages")
 def admin_messages():
     if not session.get("admin"):
         return jsonify([])
-
     return jsonify(get_all_chats())
 
 # ---------------- ADMIN LOGOUT ----------------
@@ -263,4 +267,3 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
