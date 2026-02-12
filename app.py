@@ -43,36 +43,34 @@ def save_chat(ip, role, msg, username=None):
 
     ist = pytz.timezone("Asia/Kolkata")
     now = datetime.now(ist)
-    formatted_time = now.strftime("%H:%M:%S")
-    formatted_date = now.strftime("%Y-%m-%d")
 
     chats_col.insert_one({
         "ip": ip,
         "username": username if username else "Guest",
         "role": role,
         "message": msg,
-        "time": formatted_time,
-        "date": formatted_date
+        "time": now.isoformat()
     })
 
+# ---------------- GET ALL CHATS ----------------
 def get_all_chats():
     if chats_col is None:
         return []
 
     rows = chats_col.find().sort("_id", -1)
+
     return [
-        (
-            r.get("ip"),
-            r.get("username", "Guest"),
-            r.get("role"),
-            r.get("message"),
-            r.get("time"),
-            r.get("date", "")
-        )
+        {
+            "ip": r.get("ip"),
+            "username": r.get("username", "Guest"),
+            "role": r.get("role"),
+            "message": r.get("message"),
+            "time": r.get("time")
+        }
         for r in rows
     ]
 
-# ---------------- USER HOME ----------------
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return render_template("inbox.html")
@@ -105,8 +103,8 @@ def chat():
         )
 
         res.raise_for_status()
-        data = res.json()
-        bot_reply = data["choices"][0]["message"]["content"]
+        response_data = res.json()
+        bot_reply = response_data["choices"][0]["message"]["content"]
 
         save_chat(user_ip, "bot", bot_reply, username)
 
@@ -119,63 +117,42 @@ def chat():
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["POST"])
 def register_user():
-    try:
-        if users_col is None:
-            return jsonify({"success": False, "message": "Database not connected"}), 500
-
-        data = request.get_json(silent=True)
-        name = data.get("username", "").strip()
-        password = data.get("password", "").strip()
-
-        if not name or not password:
-            return jsonify({"success": False, "message": "Username and password required"}), 400
-
-        if users_col.find_one({"username": name}):
-            return jsonify({"success": False, "message": "Username already exists"}), 409
-
-        users_col.insert_one({
-            "username": name,
-            "password": hash_pw(password)
-        })
-
-        return jsonify({"success": True})
-
-    except Exception as e:
-        print("REGISTER ERROR >>>", e)
+    if users_col is None:
         return jsonify({"success": False}), 500
+
+    data = request.get_json(force=True)
+    name = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+
+    if not name or not password:
+        return jsonify({"success": False}), 400
+
+    if users_col.find_one({"username": name}):
+        return jsonify({"success": False}), 409
+
+    users_col.insert_one({
+        "username": name,
+        "password": hash_pw(password)
+    })
+
+    return jsonify({"success": True})
 
 # ---------------- USER LOGIN ----------------
 @app.route("/login", methods=["POST"])
 def login_user():
-    try:
-        if users_col is None:
-            return jsonify({"success": False}), 500
-
-        data = request.get_json(force=True)
-        name = (data.get("username") or "").strip()
-        password = (data.get("password") or "").strip()
-
-        user = users_col.find_one({"username": name})
-        if not user:
-            return jsonify({"success": False}), 401
-
-        stored_pw = user.get("password")
-
-        if stored_pw == hash_pw(password):
-            return jsonify({"success": True, "username": name})
-
-        if stored_pw == password:
-            users_col.update_one(
-                {"_id": user["_id"]},
-                {"$set": {"password": hash_pw(password)}}
-            )
-            return jsonify({"success": True, "username": name})
-
-        return jsonify({"success": False}), 401
-
-    except Exception as e:
-        print("Login Error:", e)
+    if users_col is None:
         return jsonify({"success": False}), 500
+
+    data = request.get_json(force=True)
+    name = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+
+    user = users_col.find_one({"username": name})
+
+    if user and user.get("password") == hash_pw(password):
+        return jsonify({"success": True, "username": name})
+
+    return jsonify({"success": False}), 401
 
 # ---------------- ADMIN LOGIN ----------------
 @app.route("/admin", methods=["GET", "POST"])
@@ -188,9 +165,7 @@ def admin_login():
     if request.method == "POST":
         pwd = request.form.get("password")
 
-        if not ADMIN_PASSWORD:
-            error = "Admin password not configured"
-        elif pwd == ADMIN_PASSWORD:
+        if pwd == ADMIN_PASSWORD:
             session["admin"] = True
             return redirect("/admin/dashboard")
         else:
@@ -198,58 +173,40 @@ def admin_login():
 
     return render_template("admin_login.html", error=error)
 
+# ---------------- ADMIN DASHBOARD PAGE ----------------
 @app.route("/admin/dashboard")
 def admin_dashboard():
     if not session.get("admin"):
         return redirect("/admin")
 
-    chats = get_all_chats()
-    return render_template("admin_dashboard.html", chats=chats)
+    return render_template("admin_dashboard.html")
 
+# ---------------- ADMIN FETCH MESSAGES (IMPORTANT FIX) ----------------
+@app.route("/admin/messages")
+def admin_messages():
+    if not session.get("admin"):
+        return jsonify([])
+
+    return jsonify(get_all_chats())
+
+# ---------------- ADMIN LOGOUT ----------------
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin", None)
     return redirect("/admin")
 
-# ---------------- SEARCH ----------------
-@app.route("/admin/search")
-def admin_search():
-    if not session.get("admin"):
-        return jsonify([])
-
-    q = request.args.get("q", "")
-
-    rows = chats_col.find({
-        "$or": [
-            {"ip": {"$regex": q, "$options": "i"}},
-            {"username": {"$regex": q, "$options": "i"}},
-            {"message": {"$regex": q, "$options": "i"}}
-        ]
-    }).sort("_id", -1)
-
-    return jsonify([
-        [
-            r.get("ip"),
-            r.get("username", "Guest"),
-            r.get("role"),
-            r.get("message"),
-            r.get("time"),
-            r.get("date", "")
-        ]
-        for r in rows
-    ])
-
-# ---------------- EXPORT ----------------
+# ---------------- EXPORT CSV ----------------
 @app.route("/admin/export")
 def export_csv():
     if not session.get("admin"):
         return redirect("/admin")
 
     chats = get_all_chats()
-    csv_data = "IP,Username,Role,Message,Time,Date\n"
+    csv_data = "IP,Username,Role,Message,Time\n"
 
     for c in chats:
-        csv_data += f"{c[0]},{c[1]},{c[2]},{c[3].replace(',', ' ')},{c[4]},{c[5]}\n"
+        msg = c["message"].replace(",", " ")
+        csv_data += f"{c['ip']},{c['username']},{c['role']},{msg},{c['time']}\n"
 
     return csv_data, 200, {
         "Content-Type": "text/csv",
