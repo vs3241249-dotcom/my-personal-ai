@@ -103,16 +103,16 @@ def chat():
         print("Chat error:", e)
         return jsonify({"reply": "Server error, baad me try karo"}), 500
 
-# ---------------- REGISTER ----------------
+# ---------------- REGISTER (FIXED) ----------------
 @app.route("/register", methods=["POST"])
 def register_user():
     try:
         if users_col is None:
             return jsonify({"success": False, "message": "Database not connected"}), 500
 
-        data = request.get_json()
-        name = data.get("username")
-        password = data.get("password")
+        data = request.get_json(force=True)
+        name = (data.get("username") or "").strip()
+        password = (data.get("password") or "").strip()
 
         if not name or not password:
             return jsonify({"success": False, "message": "Username and password required"}), 400
@@ -138,9 +138,9 @@ def login_user():
         if users_col is None:
             return jsonify({"success": False, "message": "Database not connected"}), 500
 
-        data = request.get_json()
-        name = data.get("username")
-        password = data.get("password")
+        data = request.get_json(force=True)
+        name = (data.get("username") or "").strip()
+        password = (data.get("password") or "").strip()
 
         if not name or not password:
             return jsonify({"success": False, "message": "Username and password required"}), 400
