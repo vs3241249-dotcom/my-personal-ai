@@ -43,34 +43,54 @@ def save_chat(ip, role, msg, username=None):
 
     ist = pytz.timezone("Asia/Kolkata")
     now = datetime.now(ist)
+    formatted_time = now.strftime("%H:%M:%S")
+    formatted_date = now.strftime("%Y-%m-%d")
 
     chats_col.insert_one({
         "ip": ip,
         "username": username if username else "Guest",
         "role": role,
         "message": msg,
-        "time": now.isoformat()
+        "time": formatted_time,
+        "date": formatted_date
     })
 
-# ---------------- GET ALL CHATS ----------------
+# ---------------- MEMORY FUNCTION ----------------
+def get_recent_messages(ip, limit=6):
+    if chats_col is None:
+        return []
+
+    rows = list(
+        chats_col.find({"ip": ip})
+        .sort("_id", -1)
+        .limit(limit)
+    )
+
+    rows.reverse()
+
+    return [
+        {"role": r["role"], "content": r["message"]}
+        for r in rows
+    ]
+
 def get_all_chats():
     if chats_col is None:
         return []
 
     rows = chats_col.find().sort("_id", -1)
-
     return [
-        {
-            "ip": r.get("ip"),
-            "username": r.get("username", "Guest"),
-            "role": r.get("role"),
-            "message": r.get("message"),
-            "time": r.get("time")
-        }
+        (
+            r.get("ip"),
+            r.get("username", "Guest"),
+            r.get("role"),
+            r.get("message"),
+            r.get("time"),
+            r.get("date", "")
+        )
         for r in rows
     ]
 
-# ---------------- HOME ----------------
+# ---------------- USER HOME ----------------
 @app.route("/")
 def home():
     return render_template("inbox.html")
@@ -86,6 +106,29 @@ def chat():
 
         save_chat(user_ip, "user", user_msg, username)
 
+        # Load memory
+        conversation_history = get_recent_messages(user_ip)
+
+        messages = [
+            {
+                "role": "system",
+                "content": """
+You are a helpful AI assistant like ChatGPT.
+
+Rules:
+- Give short, clear and easy answers.
+- Avoid long essays unless user asks.
+- Use simple language.
+- Break answers into small readable parts.
+- Use bullet points when helpful.
+- Be natural and friendly.
+"""
+            }
+        ]
+
+        messages.extend(conversation_history)
+        messages.append({"role": "user", "content": user_msg})
+
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -94,10 +137,8 @@ def chat():
             },
             json={
                 "model": "openai/gpt-4o-mini",
-                "messages": [
-                    {"role": "system", "content": "Reply normally like ChatGPT."},
-                    {"role": "user", "content": user_msg}
-                ]
+                "messages": messages,
+                "max_tokens": 500
             },
             timeout=30
         )
@@ -117,42 +158,63 @@ def chat():
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["POST"])
 def register_user():
-    if users_col is None:
+    try:
+        if users_col is None:
+            return jsonify({"success": False, "message": "Database not connected"}), 500
+
+        data = request.get_json(silent=True)
+        name = data.get("username", "").strip()
+        password = data.get("password", "").strip()
+
+        if not name or not password:
+            return jsonify({"success": False, "message": "Username and password required"}), 400
+
+        if users_col.find_one({"username": name}):
+            return jsonify({"success": False, "message": "Username already exists"}), 409
+
+        users_col.insert_one({
+            "username": name,
+            "password": hash_pw(password)
+        })
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print("REGISTER ERROR >>>", e)
         return jsonify({"success": False}), 500
-
-    data = request.get_json(force=True)
-    name = data.get("username", "").strip()
-    password = data.get("password", "").strip()
-
-    if not name or not password:
-        return jsonify({"success": False}), 400
-
-    if users_col.find_one({"username": name}):
-        return jsonify({"success": False}), 409
-
-    users_col.insert_one({
-        "username": name,
-        "password": hash_pw(password)
-    })
-
-    return jsonify({"success": True})
 
 # ---------------- USER LOGIN ----------------
 @app.route("/login", methods=["POST"])
 def login_user():
-    if users_col is None:
+    try:
+        if users_col is None:
+            return jsonify({"success": False}), 500
+
+        data = request.get_json(force=True)
+        name = (data.get("username") or "").strip()
+        password = (data.get("password") or "").strip()
+
+        user = users_col.find_one({"username": name})
+        if not user:
+            return jsonify({"success": False}), 401
+
+        stored_pw = user.get("password")
+
+        if stored_pw == hash_pw(password):
+            return jsonify({"success": True, "username": name})
+
+        if stored_pw == password:
+            users_col.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"password": hash_pw(password)}}
+            )
+            return jsonify({"success": True, "username": name})
+
+        return jsonify({"success": False}), 401
+
+    except Exception as e:
+        print("Login Error:", e)
         return jsonify({"success": False}), 500
-
-    data = request.get_json(force=True)
-    name = data.get("username", "").strip()
-    password = data.get("password", "").strip()
-
-    user = users_col.find_one({"username": name})
-
-    if user and user.get("password") == hash_pw(password):
-        return jsonify({"success": True, "username": name})
-
-    return jsonify({"success": False}), 401
 
 # ---------------- ADMIN LOGIN ----------------
 @app.route("/admin", methods=["GET", "POST"])
@@ -165,7 +227,9 @@ def admin_login():
     if request.method == "POST":
         pwd = request.form.get("password")
 
-        if pwd == ADMIN_PASSWORD:
+        if not ADMIN_PASSWORD:
+            error = "Admin password not configured"
+        elif pwd == ADMIN_PASSWORD:
             session["admin"] = True
             return redirect("/admin/dashboard")
         else:
@@ -173,40 +237,58 @@ def admin_login():
 
     return render_template("admin_login.html", error=error)
 
-# ---------------- ADMIN DASHBOARD PAGE ----------------
 @app.route("/admin/dashboard")
 def admin_dashboard():
     if not session.get("admin"):
         return redirect("/admin")
 
-    return render_template("admin_dashboard.html")
+    chats = get_all_chats()
+    return render_template("admin_dashboard.html", chats=chats)
 
-# ---------------- ADMIN FETCH MESSAGES (IMPORTANT FIX) ----------------
-@app.route("/admin/messages")
-def admin_messages():
-    if not session.get("admin"):
-        return jsonify([])
-
-    return jsonify(get_all_chats())
-
-# ---------------- ADMIN LOGOUT ----------------
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin", None)
     return redirect("/admin")
 
-# ---------------- EXPORT CSV ----------------
+# ---------------- SEARCH ----------------
+@app.route("/admin/search")
+def admin_search():
+    if not session.get("admin"):
+        return jsonify([])
+
+    q = request.args.get("q", "")
+
+    rows = chats_col.find({
+        "$or": [
+            {"ip": {"$regex": q, "$options": "i"}},
+            {"username": {"$regex": q, "$options": "i"}},
+            {"message": {"$regex": q, "$options": "i"}}
+        ]
+    }).sort("_id", -1)
+
+    return jsonify([
+        [
+            r.get("ip"),
+            r.get("username", "Guest"),
+            r.get("role"),
+            r.get("message"),
+            r.get("time"),
+            r.get("date", "")
+        ]
+        for r in rows
+    ])
+
+# ---------------- EXPORT ----------------
 @app.route("/admin/export")
 def export_csv():
     if not session.get("admin"):
         return redirect("/admin")
 
     chats = get_all_chats()
-    csv_data = "IP,Username,Role,Message,Time\n"
+    csv_data = "IP,Username,Role,Message,Time,Date\n"
 
     for c in chats:
-        msg = c["message"].replace(",", " ")
-        csv_data += f"{c['ip']},{c['username']},{c['role']},{msg},{c['time']}\n"
+        csv_data += f"{c[0]},{c[1]},{c[2]},{c[3].replace(',', ' ')},{c[4]},{c[5]}\n"
 
     return csv_data, 200, {
         "Content-Type": "text/csv",
