@@ -138,11 +138,8 @@ function renderChat() {
 
   const text = document.createElement("span");
 
-if (m.role === "bot") {
-  text.innerHTML = marked.parse(m.text);
-} else {
-  text.textContent = m.text;
-}
+text.textContent = m.text;
+
 
     const moreBtn = document.createElement("button");
     moreBtn.className = "more-btn";
