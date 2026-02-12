@@ -5,6 +5,7 @@ from datetime import datetime
 import pytz
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
+import hashlib
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "super-secret-key-change-this")
@@ -32,6 +33,10 @@ try:
         print("MONGO_URI not set")
 except ServerSelectionTimeoutError as e:
     print("MongoDB connection failed:", e)
+
+# ---------------- HELPERS ----------------
+def hash_pw(pw):
+    return hashlib.sha256(pw.encode()).hexdigest()
 
 # ---------------- SAVE CHAT ----------------
 def save_chat(ip, role, msg):
@@ -97,44 +102,62 @@ def chat():
     except Exception as e:
         print("Chat error:", e)
         return jsonify({"reply": "Server error, baad me try karo"}), 500
-# ---------------- USER LOGIN (FIX) ----------------
-@app.route("/login", methods=["POST"])
-def login_user():
+
+# ---------------- REGISTER ----------------
+@app.route("/register", methods=["POST"])
+def register_user():
     try:
         if users_col is None:
-            return jsonify({
-                "success": False,
-                "message": "Database not connected"
-            }), 500
+            return jsonify({"success": False, "message": "Database not connected"}), 500
+
         data = request.get_json()
         name = data.get("username")
         password = data.get("password")
 
         if not name or not password:
-            return jsonify({
-                "success": False,
-                "message": "Username and password required"
-            }), 400
+            return jsonify({"success": False, "message": "Username and password required"}), 400
 
-        user = users_col.find_one({"username": name, "password": password})
+        if users_col.find_one({"username": name}):
+            return jsonify({"success": False, "message": "Username already exists"}), 409
+
+        users_col.insert_one({
+            "username": name,
+            "password": hash_pw(password)
+        })
+
+        return jsonify({"success": True, "username": name})
+
+    except Exception as e:
+        print("Register Error:", e)
+        return jsonify({"success": False, "message": "Server error"}), 500
+
+# ---------------- USER LOGIN ----------------
+@app.route("/login", methods=["POST"])
+def login_user():
+    try:
+        if users_col is None:
+            return jsonify({"success": False, "message": "Database not connected"}), 500
+
+        data = request.get_json()
+        name = data.get("username")
+        password = data.get("password")
+
+        if not name or not password:
+            return jsonify({"success": False, "message": "Username and password required"}), 400
+
+        user = users_col.find_one({"username": name})
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "Wrong username or password"
-            }), 401
+            return jsonify({"success": False, "message": "User not found"}), 401
 
-        return jsonify({
-            "success": True,
-            "username": name
-        })
+        if user["password"] != hash_pw(password):
+            return jsonify({"success": False, "message": "Wrong password"}), 401
+
+        return jsonify({"success": True, "username": name})
 
     except Exception as e:
         print("Login Error:", e)
-        return jsonify({
-            "success": False,
-            "message": "Server error"
-        }), 500
+        return jsonify({"success": False, "message": "Server error"}), 500
 
 # ---------------- ADMIN LOGIN ----------------
 @app.route("/admin", methods=["GET", "POST"])
@@ -147,7 +170,6 @@ def admin_login():
     if request.method == "POST":
         pwd = request.form.get("password")
 
-        # 🔥 SAFE CHECK (login crash nahi hoga)
         if not ADMIN_PASSWORD:
             error = "Admin password not configured on server"
         elif pwd and pwd == ADMIN_PASSWORD:
@@ -210,8 +232,3 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
-
-
-
