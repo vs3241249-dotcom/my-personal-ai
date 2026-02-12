@@ -68,7 +68,7 @@ def home():
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         user_msg = data.get("message")
         user_ip = request.remote_addr
 
@@ -103,7 +103,7 @@ def chat():
         print("Chat error:", e)
         return jsonify({"reply": "Server error, baad me try karo"}), 500
 
-# ---------------- REGISTER (FIXED) ----------------
+# ---------------- REGISTER ----------------
 @app.route("/register", methods=["POST"])
 def register_user():
     try:
@@ -131,7 +131,7 @@ def register_user():
         print("Register Error:", e)
         return jsonify({"success": False, "message": "Server error"}), 500
 
-# ---------------- USER LOGIN ----------------
+# ---------------- USER LOGIN (BACKWARD COMPATIBLE FIX) ----------------
 @app.route("/login", methods=["POST"])
 def login_user():
     try:
@@ -146,14 +146,24 @@ def login_user():
             return jsonify({"success": False, "message": "Username and password required"}), 400
 
         user = users_col.find_one({"username": name})
-
         if not user:
             return jsonify({"success": False, "message": "User not found"}), 401
 
-        if user["password"] != hash_pw(password):
-            return jsonify({"success": False, "message": "Wrong password"}), 401
+        stored_pw = user.get("password")
 
-        return jsonify({"success": True, "username": name})
+        # ✅ New users (hashed)
+        if stored_pw == hash_pw(password):
+            return jsonify({"success": True, "username": name})
+
+        # ✅ Old users (plain text → auto upgrade)
+        if stored_pw == password:
+            users_col.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"password": hash_pw(password)}}
+            )
+            return jsonify({"success": True, "username": name})
+
+        return jsonify({"success": False, "message": "Wrong password"}), 401
 
     except Exception as e:
         print("Login Error:", e)
