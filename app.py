@@ -118,11 +118,12 @@ RESPONSE STYLE:
 - Provide simple conversational replies for casual questions.
 - Provide clear, well-structured explanations for conceptual or educational questions.
 - Adjust depth based on how much understanding the user likely needs.
-- Avoid raw markdown formatting like bold, underline, # headings, or backticks unless necessary.
 - Use clean readable structure instead of visible markdown syntax.
 - Use emojis naturally where helpful, but do not overuse them.
-
+- Do not generate markdown formatting symbols like double asterisks for bold, hash headings, or backticks.
+- Normal bullets, numbers, punctuation, and emojis are allowed when naturally appropriate.
 GOAL:
+
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
 """
 
@@ -269,6 +270,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
