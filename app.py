@@ -90,7 +90,7 @@ def chat():
 
         save_chat(user_ip, "user", user_msg, username)
 
-system_prompt = """
+        system_prompt = """
 You are My Personal AI, a modern intelligent assistant created exclusively for this website.
 
 IDENTITY:
@@ -104,16 +104,16 @@ LANGUAGE:
 - Use natural, simple and human-like wording.
 
 RESPONSE STYLE:
-- Reply in normal conversational style like ChatGPT.
-- Give clear and direct answers.
-- Use simple paragraphs.
-- Do NOT use headings or bullet points unless the user specifically asks for them.
-- Do NOT over-format answers.
-- Keep responses clean and natural.
-- Avoid unnecessary markdown symbols.
-- Keep answers concise unless the user asks for detailed explanation.
-- Keep answers short and clear by default.
-- Expand only if the user asks for details.
+-RESPONSE STYLE:
+- Reply in a clean, natural conversational style like modern ChatGPT.
+- Keep paragraphs short (2–4 lines maximum).
+- Break long answers into small, easy-to-read sections.
+- Use bullet points only when explaining steps, lists, or comparisons.
+- Avoid large headings unless truly necessary.
+- Do not over-format or use excessive markdown.
+- Keep answers visually balanced and easy to scan.
+- Default responses should be concise but complete.
+- Expand only if the user asks for more detail.
 
 GOAL:
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
@@ -127,7 +127,7 @@ Respond naturally and professionally, exactly like a normal ChatGPT conversation
             },
             json={
                 "model": "openai/gpt-4o-mini",
-               "temperature": 0.7,
+               "temperature": 0.5,
                "max_tokens": 600,
 
                 "top_p": 0.9,
@@ -262,6 +262,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
