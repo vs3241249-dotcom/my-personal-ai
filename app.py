@@ -110,9 +110,12 @@ def register_user():
         if users_col is None:
             return jsonify({"success": False, "message": "Database not connected"}), 500
 
-        data = request.get_json(force=True)
-        name = (data.get("username") or "").strip()
-        password = (data.get("password") or "").strip()
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"success": False, "message": "No JSON received"}), 400
+
+        name = data.get("username", "").strip()
+        password = data.get("password", "").strip()
 
         if not name or not password:
             return jsonify({"success": False, "message": "Username and password required"}), 400
@@ -125,11 +128,12 @@ def register_user():
             "password": hash_pw(password)
         })
 
-        return jsonify({"success": True, "username": name})
+        return jsonify({"success": True, "message": "Registered successfully"})
 
     except Exception as e:
-        print("Register Error:", e)
+        print("REGISTER ERROR >>>", e)
         return jsonify({"success": False, "message": "Server error"}), 500
+
 
 # ---------------- USER LOGIN (BACKWARD COMPATIBLE FIX) ----------------
 @app.route("/login", methods=["POST"])
@@ -242,3 +246,4 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
