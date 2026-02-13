@@ -8,14 +8,18 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Scroll allow only on admin page */
+body:not(.admin-page) {
   overflow: hidden;
 }
-/* Admin page scroll enable */
-body.admin-page {
-  overflow-y: auto !important;
-  height: auto !important;
-  min-height: 100vh;
-}
+
 
 /* ================= THEMES ================= */
 
@@ -260,7 +264,6 @@ body.dark .inline-menu {
   /* 🔒 NO ZOOM */
   html, body {
     height: 100%;
-    overflow: hidden;
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
   }
@@ -585,4 +588,9 @@ margin: 6px 0 4px 0;
 
 .msg.bot strong {
   font-weight: 600;
+}
+/* ===== ADMIN PAGE SCROLL FIX (SAFE) ===== */
+body.admin-page .container {
+  height: auto;
+  overflow: visible;
 }
