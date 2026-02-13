@@ -159,7 +159,7 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-               "model": "openai/gpt-4o-mini"
+               "model": "openai/gpt-4o-mini",
                 "temperature": 0.3,
                 "max_tokens": 500,
                 "top_p": 0.9,
@@ -287,5 +287,6 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
