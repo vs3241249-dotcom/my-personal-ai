@@ -62,11 +62,20 @@ def get_chat_history(username, limit=15):
 
     history = []
     for r in reversed(list(rows)):
+
+        role = r.get("role")
+
+        # SAFE FIX: convert old "bot" role to "assistant"
+        if role == "bot":
+            role = "assistant"
+
         history.append({
-            "role": r.get("role"),
+            "role": role,
             "content": r.get("message")
         })
+
     return history
+
 
 
 def get_all_chats():
@@ -178,9 +187,10 @@ def chat():
         if not bot_reply:
             bot_reply = "Sorry, I couldn't generate a proper response. Please try again."
 
-       save_chat(user_ip, "assistant", bot_reply, username)
+        save_chat(user_ip, "assistant", bot_reply, username)
 
-       return jsonify({"reply": bot_reply})
+        return jsonify({"reply": bot_reply})
+
 
     except Exception as e:
         print("Chat error:", e)
@@ -289,6 +299,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
