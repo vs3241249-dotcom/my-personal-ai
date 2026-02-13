@@ -32,11 +32,12 @@ try:
 except ServerSelectionTimeoutError as e:
     print("MongoDB connection failed:", e)
 
+
 # ---------------- HELPERS ----------------
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
-# ---------------- SAVE CHAT ----------------
+
 def save_chat(ip, role, msg, username=None):
     if chats_col is None:
         return
@@ -52,7 +53,7 @@ def save_chat(ip, role, msg, username=None):
         "time": now.isoformat()
     })
 
-# ---------------- MEMORY LOAD ----------------
+
 def get_chat_history(username, limit=15):
     if chats_col is None:
         return []
@@ -67,7 +68,7 @@ def get_chat_history(username, limit=15):
         })
     return history
 
-# ---------------- GET ALL CHATS ----------------
+
 def get_all_chats():
     if chats_col is None:
         return []
@@ -85,12 +86,13 @@ def get_all_chats():
         for r in rows
     ]
 
-# ---------------- HOME ----------------
+
 @app.route("/")
 def home():
     return render_template("inbox.html")
 
-# ---------------- CHAT ----------------
+
+# ---------------- CHAT ROUTE ----------------
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
@@ -105,7 +107,7 @@ def chat():
 
         save_chat(user_ip, "user", user_msg, username)
 
-        # -------- SAFE SYSTEM PROMPT (NO TRIPLE QUOTES) ----------
+        # ---------------- SYSTEM PROMPT (AS IT IS – NO CHANGES) ----------------
         system_prompt = (
             "You are My Personal AI, a modern intelligent assistant created exclusively for this website.\n"
             "\n"
@@ -140,23 +142,19 @@ def chat():
             "Respond naturally and professionally, like a normal ChatGPT conversation.\n"
         )
 
-        # ---------------- CREATE MEMORY MESSAGES ----------------
+        # ---------------- MEMORY ----------------
         history = get_chat_history(username)
 
-        messages = [
-            {"role": "system", "content": system_prompt}
-        ]
-
+        messages = [{"role": "system", "content": system_prompt}]
         messages.extend(history)
-
         messages.append({"role": "user", "content": user_msg})
 
-        # ---------------- API REQUEST ----------------
+        # ---------------- API CALL ----------------
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
                 "HTTP-Referer": "https://my-personal-ai.onrender.com",
                 "X-Title": "My Personal AI"
             },
@@ -186,7 +184,8 @@ def chat():
         print("Chat error:", e)
         return jsonify({"reply": "Server error, please try again later."}), 500
 
-# ---------------- REGISTER ----------------
+
+# ---------------- USER AUTH ----------------
 @app.route("/register", methods=["POST"])
 def register_user():
     if users_col is None:
@@ -209,7 +208,7 @@ def register_user():
 
     return jsonify({"success": True})
 
-# ---------------- USER LOGIN ----------------
+
 @app.route("/login", methods=["POST"])
 def login_user():
     if users_col is None:
@@ -226,7 +225,8 @@ def login_user():
 
     return jsonify({"success": False}), 401
 
-# ---------------- ADMIN LOGIN ----------------
+
+# ---------------- ADMIN PANEL ----------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin_login():
     if session.get("admin"):
@@ -245,27 +245,27 @@ def admin_login():
 
     return render_template("admin_login.html", error=error)
 
-# ---------------- ADMIN DASHBOARD ----------------
+
 @app.route("/admin/dashboard")
 def admin_dashboard():
     if not session.get("admin"):
         return redirect("/admin")
     return render_template("admin_dashboard.html")
 
-# ---------------- ADMIN MESSAGES ----------------
+
 @app.route("/admin/messages")
 def admin_messages():
     if not session.get("admin"):
         return jsonify([])
     return jsonify(get_all_chats())
 
-# ---------------- ADMIN LOGOUT ----------------
+
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin", None)
     return redirect("/admin")
 
-# ---------------- EXPORT CSV ----------------
+
 @app.route("/admin/export")
 def export_csv():
     if not session.get("admin"):
@@ -283,8 +283,7 @@ def export_csv():
         "Content-Disposition": "attachment; filename=chat_history.csv"
     }
 
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
