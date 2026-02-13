@@ -159,7 +159,7 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-               "model": "gpt-4o-mini",
+                "model": "openai/gpt-4o-mini",
                 "temperature": 0.3,
                 "max_tokens": 500,
                 "top_p": 0.9,
@@ -178,9 +178,9 @@ def chat():
         if not bot_reply:
             bot_reply = "Sorry, I couldn't generate a proper response. Please try again."
 
-        save_chat(user_ip, "bot", bot_reply, username)
+       save_chat(user_ip, "assistant", bot_reply, username)
 
-        return jsonify({"reply": bot_reply})
+       return jsonify({"reply": bot_reply})
 
     except Exception as e:
         print("Chat error:", e)
@@ -289,6 +289,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
