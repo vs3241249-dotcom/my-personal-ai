@@ -2,96 +2,143 @@
 <html>
 <head>
   <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
-      background: #0b1220;
-      color: #ffffff;
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #0b1220;
+      color: #e5e7eb;
     }
 
     header {
-      background: #0f172a;
-      padding: 15px 25px;
+      background: #111827;
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 600;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    header a {
+      color: #cbd5e1;
+      text-decoration: none;
+      margin-left: 15px;
+      font-size: 14px;
+    }
+
+    header a:hover {
+      color: white;
     }
 
     .container {
-      padding: 20px;
+      padding: 25px;
+    }
+
+    .stats {
+      margin-bottom: 15px;
+      font-size: 14px;
+      opacity: 0.85;
     }
 
     .search-box {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .search-box input {
       width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #111827;
+      color: white;
       outline: none;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
+      background: #0f172a;
     }
 
     th {
-      background: #111827;
-      padding: 10px;
+      background: #1e293b;
+      padding: 14px;
       text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
     td {
-      padding: 10px;
+      padding: 12px;
       border-bottom: 1px solid #1f2937;
-      word-break: break-word;
+      vertical-align: top;
+      font-size: 13px;
+      word-wrap: break-word;
     }
 
     tr:hover {
       background: #1e293b;
     }
 
-    .bot {
-      color: #22c55e;
-      font-weight: bold;
+    /* Column widths */
+    th:nth-child(1), td:nth-child(1) { width: 140px; white-space: nowrap; }
+    th:nth-child(2), td:nth-child(2) { width: 140px; }
+    th:nth-child(3), td:nth-child(3) { width: 110px; white-space: nowrap; }
+    th:nth-child(4), td:nth-child(4) { width: 45%; }
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6) { width: 120px; white-space: nowrap; }
+
+    /* Scrollable message */
+    td:nth-child(4) {
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    /* Role badge */
+    .role {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-block;
+      text-align: center;
     }
 
     .user {
-      color: #3b82f6;
-      font-weight: bold;
-    }
-
-    .stats {
-      margin-bottom: 15px;
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    a {
+      background: #2563eb;
       color: white;
-      text-decoration: none;
     }
 
-    a:hover {
-      text-decoration: underline;
+    .assistant {
+      background: #16a34a;
+      color: white;
     }
+
   </style>
 </head>
 
-<body class="admin-page">
+<body>
 
 <header>
-  📊 Admin Dashboard
+  Admin Dashboard
   <div>
-    <a href="/admin/export">⬇ Export CSV</a> |
+    <a href="/admin/export">Export CSV</a>
     <a href="/admin/logout">Logout</a>
   </div>
 </header>
@@ -106,20 +153,22 @@
     <input type="text" id="searchInput" placeholder="Search by IP, Username or Message...">
   </div>
 
-  <table id="chatTable">
-    <thead>
-      <tr>
-        <th>IP</th>
-        <th>Username</th>
-        <th>Role</th>
-        <th>Message</th>
-        <th>Time</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table id="chatTable">
+      <thead>
+        <tr>
+          <th>IP</th>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Message</th>
+          <th>Time</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+      </tbody>
+    </table>
+  </div>
 
 </div>
 
@@ -143,7 +192,7 @@ async function loadMessages() {
         <tr>
           <td>${msg.ip || ""}</td>
           <td>${msg.username || ""}</td>
-          <td class="${msg.role}">${msg.role}</td>
+          <td><span class="role ${msg.role}">${msg.role}</span></td>
           <td>${msg.message}</td>
           <td>${time}</td>
           <td>${date}</td>
@@ -171,5 +220,3 @@ document.getElementById("searchInput").addEventListener("input", function () {
 
 </body>
 </html>
-
-
