@@ -54,7 +54,7 @@ def save_chat(ip, role, msg, username=None):
     })
 
 
-def get_chat_history(username, limit=15):
+def get_chat_history(username, limit=25):
     if chats_col is None:
         return []
 
@@ -129,28 +129,38 @@ def chat():
 "LANGUAGE:\n"
 "Always reply in the same language as the user.\n"
 "Use natural, clear, human-like wording.\n"
+"Match the user's tone appropriately.\n"
+"\n"
+"QUESTION HANDLING:\n"
+"Do NOT repeat the user's question in the answer.\n"
+"Do NOT convert the question into a heading.\n"
+"Start directly with the answer.\n"
 "\n"
 "RESPONSE STYLE:\n"
+"Keep visual hierarchy subtle and compact.\n"
+"Avoid large markdown-style headings.\n"
 "First understand the user's intent clearly.\n"
 "Structure the response based on the type of question.\n"
 "For simple questions, give a clear direct answer in 1–2 short paragraphs.\n"
-"For explanatory topics, use clean spacing and logical sections when helpful.\n"
+"For explanatory topics, use clean spacing and logical sections.\n"
 "For comparisons or step-based answers, use bullet points.\n"
+"Keep paragraphs short (2–3 lines max).\n"
 "Avoid wall-of-text.\n"
-"Keep formatting modern, clean, and easy to read.\n"
+"Keep formatting modern, compact, and professional.\n"
+"Do not use oversized headings.\n"
 "Do not over-format or add unnecessary decoration.\n"
 "Maintain a calm, confident, and helpful tone.\n"
 "\n"
 "EMOJI RULES:\n"
-"Use emojis only when they add clarity or friendliness.\n"
+"Use minimal and meaningful emojis only when appropriate.\n"
 "Do not overuse emojis.\n"
 "Do not use emojis in serious or formal topics.\n"
 "\n"
 "TECHNICAL ANSWERS:\n"
 "For coding questions, always provide properly formatted code blocks using triple backticks.\n"
-"Separate multiple files clearly if needed.\n"
-"Do not mix explanation inside the code block.\n"
-"Keep explanations short, practical, and developer-friendly.\n"
+"Never mix explanation inside code blocks.\n"
+"Separate explanation and code clearly.\n"
+"Keep explanations practical and developer-friendly.\n"
 "Avoid unnecessary theory.\n"
 "\n"
 "INTELLIGENCE:\n"
@@ -159,7 +169,7 @@ def chat():
 "If unclear, ask one short clarifying question.\n"
 "\n"
 "GOAL:\n"
-"Give clear, well-structured, visually balanced responses that are easy to understand and feel professional.\n"
+"Deliver premium, structured, clean, modern SaaS-style responses without repeating the question.\n"
 )
 
         # ---------------- MEMORY ----------------
@@ -179,9 +189,9 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "openai/gpt-4o-mini",
-                "temperature": 0.6,
-                "max_tokens": 500,
+                "model": "openai/gpt-4o",
+                "temperature": 0.5,
+                "max_tokens": 600,
                 "top_p": 0.9,
                 "messages": messages
             },
@@ -193,7 +203,12 @@ def chat():
         res.raise_for_status()
         response_data = res.json()
 
-        bot_reply = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        bot_reply = (
+            response_data.get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "")
+            .strip()
+        )
 
         if not bot_reply:
             bot_reply = "Sorry, I couldn't generate a proper response. Please try again."
@@ -201,7 +216,6 @@ def chat():
         save_chat(user_ip, "assistant", bot_reply, username)
 
         return jsonify({"reply": bot_reply})
-
 
     except Exception as e:
         print("Chat error:", e)
@@ -310,6 +324,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
