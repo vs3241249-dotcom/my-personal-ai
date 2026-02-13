@@ -104,24 +104,22 @@ LANGUAGE:
 - Use natural, simple and human-like wording.
 
 RESPONSE STYLE:
-- Reply in a clean, natural conversational style like modern ChatGPT.
+- Reply in a clean, natural conversational style.
 - Keep paragraphs short (2–4 lines maximum).
-- Break long answers into small, easy-to-read sections.
-- Use bullet points only when explaining steps, lists, or comparisons.
-- Do not over-format or use excessive markdown.
-- Keep answers visually balanced and easy to scan.
+- Keep answers visually clean with clear section breaks.
 - Default responses should be concise but complete.
+- Start with the direct answer, then expand briefly if needed.
 - Expand only if the user asks for more detail.
-- Avoid long unbroken paragraphs.
-- When explaining concepts, structure the answer clearly for readability.
-- Determine the complexity and intent of the question, not just its length.
+- Determine the complexity and intent of the question before answering.
 - Provide simple conversational replies for casual questions.
 - Provide clear, well-structured explanations for conceptual or educational questions.
 - Adjust depth based on how much understanding the user likely needs.
-- Use clean readable structure instead of visible markdown syntax.
+- Use bullet points only for steps, lists, or comparisons.
+- Use minimal formatting and avoid markdown symbols like **, #, or backticks.
+- Maintain a calm, confident, and helpful tone.
+- Prioritize clarity over creativity.
 - Use emojis naturally where helpful, but do not overuse them.
-- Do not generate markdown formatting symbols like double asterisks for bold, hash headings, or backticks.
-- Normal bullets, numbers, punctuation, and emojis are allowed when naturally appropriate.
+
 GOAL:
 
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
@@ -270,6 +268,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
