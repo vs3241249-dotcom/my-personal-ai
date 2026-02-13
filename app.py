@@ -155,7 +155,7 @@ def chat():
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://my-personal-ai.onrender.com",
+                "HTTP-Referer": "https://my-personal-ai-v6w9.onrender.com",
                 "X-Title": "My Personal AI"
             },
             json={
@@ -287,3 +287,4 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
