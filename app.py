@@ -52,6 +52,22 @@ def save_chat(ip, role, msg, username=None):
         "time": now.isoformat()
     })
 
+# ---------------- MEMORY LOAD ----------------
+def get_chat_history(username, limit=15):
+    if chats_col is None:
+        return []
+
+    rows = chats_col.find({"username": username}).sort("_id", -1).limit(limit)
+
+    history = []
+    for r in reversed(list(rows)):
+        history.append({
+            "role": r.get("role"),
+            "content": r.get("message")
+        })
+    return history
+
+
 # ---------------- GET ALL CHATS ----------------
 def get_all_chats():
     if chats_col is None:
@@ -128,6 +144,18 @@ GOAL:
 Respond naturally and professionally, exactly like a normal ChatGPT conversation.
 """
 
+        # ---------------- CREATE MEMORY MESSAGES ----------------
+        history = get_chat_history(username)
+
+        messages = [
+            {"role": "system", "content": system_prompt}
+        ]
+
+        messages.extend(history)
+
+        messages.append({"role": "user", "content": user_msg})
+
+        # ---------------- API REQUEST ----------------
         res = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -136,20 +164,10 @@ Respond naturally and professionally, exactly like a normal ChatGPT conversation
             },
             json={
                 "model": "openai/gpt-4o-mini",
-               "temperature": 0.3,
-               "max_tokens": 500,
-
+                "temperature": 0.3,
+                "max_tokens": 500,
                 "top_p": 0.9,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                       "content": user_msg
-                    }
-                ]
+                "messages": messages
             },
             timeout=30
         )
@@ -271,14 +289,3 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
-
-
-
-
-
-
-
-
-
