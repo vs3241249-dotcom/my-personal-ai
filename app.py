@@ -159,7 +159,7 @@ def chat():
                 "X-Title": "My Personal AI"
             },
             json={
-               "model": "openai/gpt-4o-mini",
+               "model": "gpt-4o-mini",
                 "temperature": 0.3,
                 "max_tokens": 500,
                 "top_p": 0.9,
@@ -167,6 +167,8 @@ def chat():
             },
             timeout=30
         )
+        print("STATUS:", res.status_code)
+        print("RESPONSE:", res.text)
 
         res.raise_for_status()
         response_data = res.json()
@@ -287,6 +289,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
