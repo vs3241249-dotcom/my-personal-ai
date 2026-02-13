@@ -106,19 +106,22 @@ LANGUAGE:
 RESPONSE STYLE:
 - Reply in a clean, natural conversational style.
 - Keep paragraphs short (2–4 lines maximum).
-- Keep answers visually clean with clear section breaks.
+- Keep answers visually clean and easy to scan.
 - Default responses should be concise but complete.
-- Start with the direct answer, then expand briefly if needed.
+- Start with a short direct answer, then expand briefly if needed.
 - Expand only if the user asks for more detail.
 - Determine the complexity and intent of the question before answering.
 - Provide simple conversational replies for casual questions.
 - Provide clear, well-structured explanations for conceptual or educational questions.
 - Adjust depth based on how much understanding the user likely needs.
 - Use bullet points only for steps, lists, or comparisons.
-- Use minimal formatting and avoid markdown symbols like **, #, or backticks.
+- Use minimal formatting and never use markdown symbols like **, #, or backticks.
 - Maintain a calm, confident, and helpful tone.
 - Prioritize clarity over creativity.
 - Use emojis naturally where helpful, but do not overuse them.
+- If unsure about an answer, say so honestly instead of guessing.
+- If the question is unclear, ask one short clarifying question.
+- When explaining how to do something, provide clear step-by-step instructions unless clarification is necessary.
 
 GOAL:
 
@@ -268,6 +271,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
