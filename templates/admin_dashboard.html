@@ -154,6 +154,19 @@
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Search by IP, Username or Message...">
   </div>
+  <!-- 🔽 YAHAN ADD KARNA HAI -->
+<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+
+  <select id="roleFilter" style="padding:8px; border-radius:6px; background:#111827; color:white; border:1px solid #1f2937;">
+    <option value="">All Roles</option>
+    <option value="user">User</option>
+    <option value="assistant">Assistant</option>
+  </select>
+
+  <input type="date" id="dateFilter"
+    style="padding:8px; border-radius:6px; background:#111827; color:white; border:1px solid #1f2937;">
+
+</div>
 
   <div class="table-wrapper">
     <table id="chatTable">
@@ -213,6 +226,7 @@ document.getElementById("todayMessages").innerText = todayCount;
       `;
       tableBody.innerHTML += row;
     });
+    applyFilters();
 
   } catch (error) {
     console.error("Error loading messages:", error);
@@ -221,18 +235,39 @@ document.getElementById("todayMessages").innerText = todayCount;
 
 window.onload = loadMessages;
 setInterval(loadMessages, 5000);
+// 🔍 Search + Filters
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("roleFilter").addEventListener("change", applyFilters);
+document.getElementById("dateFilter").addEventListener("change", applyFilters);
 
-document.getElementById("searchInput").addEventListener("input", function () {
-  const value = this.value.toLowerCase();
+function applyFilters() {
+  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+  const roleValue = document.getElementById("roleFilter").value.toLowerCase();
+  const dateValue = document.getElementById("dateFilter").value;
+
   const rows = document.querySelectorAll("#chatTable tbody tr");
 
   rows.forEach(row => {
-    row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+    const textMatch = row.innerText.toLowerCase().includes(searchValue);
+    const role = row.children[2].innerText.toLowerCase();
+    const date = row.children[5].innerText;
+
+    let roleMatch = !roleValue || role === roleValue;
+    let dateMatch = true;
+
+    if (dateValue) {
+      const selectedDate = new Date(dateValue).toLocaleDateString();
+      dateMatch = date === selectedDate;
+    }
+
+    row.style.display = (textMatch && roleMatch && dateMatch) ? "" : "none";
   });
-});
+}
+
 </script>
 
 </body>
 </html>
+
 
 
