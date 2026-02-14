@@ -145,9 +145,11 @@
 
 <div class="container">
 
-  <div class="stats">
-    Total Messages: <span id="totalMessages">0</span>
-  </div>
+<div class="stats">
+  Total Messages: <span id="totalMessages">0</span>
+  <br>
+  Today Messages: <span id="todayMessages">0</span>
+</div>
 
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Search by IP, Username or Message...">
@@ -182,6 +184,17 @@ async function loadMessages() {
     tableBody.innerHTML = "";
 
     document.getElementById("totalMessages").innerText = data.length;
+    let todayCount = 0;
+const today = new Date().toLocaleDateString();
+
+data.forEach(msg => {
+  const msgDate = new Date(msg.time).toLocaleDateString();
+  if (msgDate === today) {
+    todayCount++;
+  }
+});
+
+document.getElementById("todayMessages").innerText = todayCount;
 
     data.forEach(msg => {
       const dateObj = new Date(msg.time);
@@ -221,4 +234,5 @@ document.getElementById("searchInput").addEventListener("input", function () {
 
 </body>
 </html>
+
 
