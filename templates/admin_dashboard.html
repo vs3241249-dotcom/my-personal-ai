@@ -199,6 +199,8 @@ async function loadMessages() {
     document.getElementById("totalMessages").innerText = data.length;
     let todayCount = 0;
 const today = new Date().toLocaleDateString();
+    
+data.sort((a, b) => new Date(b.time) - new Date(a.time));
 
 data.forEach(msg => {
   const msgDate = new Date(msg.time).toLocaleDateString();
@@ -268,6 +270,7 @@ function applyFilters() {
 
 </body>
 </html>
+
 
 
 
