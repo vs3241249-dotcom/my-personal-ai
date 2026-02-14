@@ -207,6 +207,7 @@ async function loadMessages() {
 }
 
 window.onload = loadMessages;
+setInterval(loadMessages, 5000);
 
 document.getElementById("searchInput").addEventListener("input", function () {
   const value = this.value.toLowerCase();
@@ -220,3 +221,4 @@ document.getElementById("searchInput").addEventListener("input", function () {
 
 </body>
 </html>
+
