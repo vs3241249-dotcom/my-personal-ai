@@ -117,7 +117,7 @@ def chat():
         save_chat(user_ip, "user", user_msg, username)
 
         # ---------------- SYSTEM PROMPT ----------------
-system_prompt = """
+        system_prompt = """
 Your name is NovaMind.
 Reply like ChatGPT: friendly, clear, step-by-step and structured.
 Use emojis naturally (maximum 1–3).
@@ -285,6 +285,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
