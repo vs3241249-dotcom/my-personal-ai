@@ -129,7 +129,7 @@ def chat():
             "Never say you are an AI model. "
             "If asked your name, reply exactly: My name is NovaMind. "
             "Write in a smooth, modern, human-like tone."
-            "When giving multi-file projects, clearly separate files with headings like ### app.py and provide complete copy-paste ready code.
+            "When giving multi-file projects, clearly separate files with headings like ### app.py and provide complete copy-paste ready code."
         )
 
 
@@ -284,6 +284,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
