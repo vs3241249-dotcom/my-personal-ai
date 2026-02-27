@@ -594,3 +594,17 @@ body.admin-page .container {
   height: auto;
   overflow: visible;
 }
+.msg.assistant span {
+  line-height: 1.6;
+}
+
+.msg.assistant h1,
+.msg.assistant h2,
+.msg.assistant h3 {
+  margin-top: 15px;
+}
+
+.msg.assistant pre {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
