@@ -225,24 +225,36 @@ typing.innerHTML = `
 `;
 chatDiv.appendChild(typing);
 
-  fetch("/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: text,
-      username: username
-    })
+fetch("/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    message: text,
+    username: username
   })
-    .then(res => res.json())
-    .then(data => {
-      typing.remove();
-      chats[currentChatIndex].messages.push({
-        role: "assistant",
-        text: data.reply
-      });
-      saveChats();
-      renderChat();
+})
+  .then(res => res.json())
+  .then(data => {
+    typing.remove();
+    chats[currentChatIndex].messages.push({
+      role: "assistant",
+      text: data.reply
     });
+    saveChats();
+    renderChat();
+  })
+  .catch(err => {
+    typing.remove();
+    console.error("Chat error:", err);
+
+    chats[currentChatIndex].messages.push({
+      role: "assistant",
+      text: "⚠️ Server error. Please try again."
+    });
+
+    saveChats();
+    renderChat();
+  });
 }
 
 /* ================= LOGIN / REGISTER SYSTEM ================= */
