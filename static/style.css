@@ -603,7 +603,28 @@ body.admin-page .container {
 .msg.assistant h3 {
   margin-top: 15px;
 }
+ .typing-text {
+  margin-right: 5px;
+}
 
+.dots span {
+  animation: blink 1.4s infinite both;
+  font-weight: bold;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
 .msg.assistant pre {
   margin-top: 10px;
   margin-bottom: 10px;
