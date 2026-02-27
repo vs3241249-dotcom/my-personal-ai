@@ -138,7 +138,14 @@ function renderChat() {
 
   const text = document.createElement("span");
 
-text.textContent = m.text;
+if (m.role === "assistant") {
+  text.innerHTML = marked.parse(m.text);
+  setTimeout(() => {
+    hljs.highlightAll();
+  }, 0);
+} else {
+  text.textContent = m.text;
+}
 
 
     const moreBtn = document.createElement("button");
@@ -225,7 +232,7 @@ function sendMessage() {
     .then(data => {
       typing.remove();
       chats[currentChatIndex].messages.push({
-        role: "bot",
+        role: "assistant",
         text: data.reply
       });
       saveChats();
