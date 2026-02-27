@@ -215,10 +215,15 @@ function sendMessage() {
   renderChat();
   renderHistory();
 
-  const typing = document.createElement("div");
-  typing.className = "msg bot";
-  typing.textContent = "AI is typing...";
-  chatDiv.appendChild(typing);
+const typing = document.createElement("div");
+typing.className = "msg assistant";
+typing.innerHTML = `
+  <span class="typing-text">NovaMind is typing</span>
+  <span class="dots">
+    <span>.</span><span>.</span><span>.</span>
+  </span>
+`;
+chatDiv.appendChild(typing);
 
   fetch("/chat", {
     method: "POST",
