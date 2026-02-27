@@ -164,12 +164,12 @@ body.dark .top {
   color: white;
 }
 
-.msg.bot {
+.msg.assistant {
   align-self: flex-start;
   background: rgba(0,0,0,0.08);
 }
 
-body.dark .msg.bot {
+body.dark .msg.assistant {
   background: #1e293b;
 }
 
@@ -561,32 +561,32 @@ body.light .more-btn:hover {
   line-height: 1.6;
 }
 
-.msg.bot h1,
-.msg.bot h2,
-.msg.bot h3,
-.msg.bot h4,
-.msg.bot h5,
-.msg.bot h6 {
+.msg.assistant h1,
+.msg.assistant h2,
+.msg.assistant h3,
+.msg.assistant h4,
+.msg.assistant h5,
+.msg.assistant h6 {
 font-size: 15px !important;
 font-weight: 600;
 margin: 6px 0 4px 0;
 }
 
-.msg.bot p {
+.msg.assistant p {
   margin: 6px 0;
 }
 
-.msg.bot ul,
-.msg.bot ol {
+.msg.assistant ul,
+.msg.assistant ol {
   margin: 4px 0;
   padding-left: 16px;
 }
 
-.msg.bot li {
+.msg.assistant li {
   margin: 2px 0;
 }
 
-.msg.bot strong {
+.msg.assistant strong {
   font-weight: 600;
 }
 /* ===== ADMIN PAGE SCROLL FIX (SAFE) ===== */
