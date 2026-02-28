@@ -165,7 +165,7 @@ Maximum 2 emojis.
             json={
                 "model": "openai/gpt-4o",
                 "temperature": 0.3,
-                "max_tokens": 1200,
+                "max_tokens": 400,
                 "top_p": 0.9,
                 "messages": messages
             },
@@ -294,6 +294,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
