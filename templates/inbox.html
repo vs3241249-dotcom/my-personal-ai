@@ -44,13 +44,22 @@
   <div class="container" id="chatApp" style="display:none;">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <h3>Your Chats</h3>
-        <button id="newChat" title="New Chat">＋</button>
-      </div>
-      <div id="history"></div>
-    </aside>
+<aside class="sidebar" id="sidebar">
+
+  <div class="sidebar-header">
+    <h3>Your Chats</h3>
+    <button id="newChat" title="New Chat">＋</button>
+  </div>
+
+  <!-- Scrollable chat list -->
+  <div id="history" class="chat-list"></div>
+
+  <!-- Fixed Logout Button -->
+  <div class="logout-box">
+    <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+  </div>
+
+</aside>
 
     <!-- MAIN CHAT AREA -->
     <main class="chat-area">
