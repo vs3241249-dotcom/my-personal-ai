@@ -629,3 +629,36 @@ body.admin-page .container {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+/* Chat list scroll area */
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 70px; /* logout button ke liye space */
+}
+
+/* Logout box at bottom */
+.logout-box {
+  position: sticky;
+  bottom: 0;
+  background: var(--sidebar);
+  border-top: 1px solid var(--border);
+  padding: 12px;
+  z-index: 5;
+}
+
+/* Logout button */
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logout-btn:hover {
+  opacity: 0.85;
+}
