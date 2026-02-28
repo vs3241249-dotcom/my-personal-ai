@@ -233,11 +233,6 @@ def login_user():
     return jsonify({"success": False}), 401
 
 
-# ---------------- LOGOUT ----------------
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/login")
 # ---------------- ADMIN PANEL ----------------
 @app.route("/admin", methods=["GET", "POST"])
 def admin_login():
@@ -299,3 +294,23 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
