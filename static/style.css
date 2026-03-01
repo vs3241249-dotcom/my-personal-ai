@@ -629,3 +629,33 @@ body.admin-page .container {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+/* ================= LOGOUT BUTTON ================= */
+
+.logout-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+/* Light Mode */
+body.light .logout-btn {
+  background: #ff4d4d;
+  color: white;
+}
+
+body.light .logout-btn:hover {
+  background: #e60000;
+}
+
+/* Dark Mode */
+body.dark .logout-btn {
+  background: #ff4d4d;
+  color: white;
+}
+
+body.dark .logout-btn:hover {
+  background: #ff1a1a;
+}
