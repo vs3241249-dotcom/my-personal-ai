@@ -310,7 +310,7 @@ loginBtn.addEventListener("click", async () => {
     return;
   }
 
-  const url = isRegisterMode ? "/register" : "/login";
+  const url = isRegisterMode ? "/auth/register" : "/auth/login";
 
   try {
     const res = await fetch(url, {
@@ -352,5 +352,32 @@ if (togglePassword) {
   togglePassword.addEventListener("click", () => {
     loginPassword.type =
       loginPassword.type === "password" ? "text" : "password";
+  });
+}
+/* ================= LOGOUT ================= */
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await fetch("/logout", { method: "POST" });
+
+      // Clear local storage
+      localStorage.removeItem("username");
+      username = null;
+
+      // Hide chat and show login
+      chatApp.style.display = "none";
+      loginPage.style.display = "flex";
+
+      // Optional clear screen
+      chatDiv.innerHTML = "";
+      historyDiv.innerHTML = "";
+      currentChatIndex = null;
+
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   });
 }
