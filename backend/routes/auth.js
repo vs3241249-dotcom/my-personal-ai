@@ -48,8 +48,7 @@ router.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.json({ success: false, message: "Wrong password" });
     }
-    // ✅ SESSION SET KARO (IMPORTANT)
-    req.session.user = user._id;
+
     res.json({ success: true, username: user.username });
 
   } catch (err) {
@@ -59,4 +58,3 @@ router.post("/login", async (req, res) => {
 });
 
 module.exports = router;
-
