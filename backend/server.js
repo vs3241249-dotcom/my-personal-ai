@@ -1,4 +1,3 @@
-const session = require("express-session");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -12,14 +11,6 @@ const app = express();
 /* ================= MIDDLEWARE ================= */
 app.use(cors());
 app.use(express.json());
-app.use(
-  session({
-    secret: "novamind-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false }
-  })
-);
 
 /* ================= MONGODB ================= */
 mongoose
@@ -43,24 +34,13 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/dashboard", (req, res) => {
-  if (!req.session.user) {
-    return res.redirect("/login");
-  }
-
-res.sendFile(path.join(__dirname, "../templates", "inbox.html"));
+  res.sendFile(path.join(__dirname, "../templates", "admin_dashboard.html"));
 });
+
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-app.post("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.clearCookie("connect.sid");
-    res.json({ success: true });
-  });
-});
-
-
 
