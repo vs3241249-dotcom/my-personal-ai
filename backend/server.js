@@ -47,7 +47,7 @@ app.get("/dashboard", (req, res) => {
     return res.redirect("/login");
   }
 
-  res.sendFile(path.join(__dirname, "../templates", "admin_dashboard.html"));
+res.sendFile(path.join(__dirname, "../templates", "inbox.html"));
 });
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 10000;
@@ -61,5 +61,6 @@ app.post("/logout", (req, res) => {
     res.json({ success: true });
   });
 });
+
 
 
