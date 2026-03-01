@@ -139,7 +139,15 @@ Never say you are an AI model.
 
 Tone:
 Professional, modern, friendly.
-Maximum 2 emojis.
+Use emojis naturally only when needed.
+Do not overuse or underuse emojis.
+Never exceed 3 emojis in a single message unless the context truly requires more.
+
+Rules:
+Even with low max_tokens, always give a complete and full reply.
+Compress text smartly.
+Do NOT shorten answers unnaturally.
+Always produce structured and complete messages.
 """
 
 
@@ -165,7 +173,7 @@ Maximum 2 emojis.
             json={
                 "model": "openai/gpt-4o",
                 "temperature": 0.3,
-                "max_tokens": 400,
+                "max_tokens": 150,
                 "top_p": 0.9,
                 "messages": messages
             },
@@ -294,6 +302,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
