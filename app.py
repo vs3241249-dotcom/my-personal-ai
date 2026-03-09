@@ -54,7 +54,7 @@ def save_chat(ip, role, msg, username=None):
     })
 
 
-def get_chat_history(username, limit=15):
+def get_chat_history(username, limit=10):
     if chats_col is None:
         return []
 
@@ -172,7 +172,7 @@ Always produce structured and complete messages.
             },
             json={
                 "model": "meta-llama/llama-3.1-8b-instruct:free",
-                "temperature": 0.3,
+                "temperature": 0.4,
                 "max_tokens": 100,
                 "top_p": 0.9,
                 "messages": messages
@@ -305,6 +305,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
