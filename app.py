@@ -171,7 +171,7 @@ Always produce structured and complete messages.
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "deepseek/deepseek-chat:free",    
+                "model": "meta-llama/llama-3.1-8b-instruct:free",    
                 "temperature": 0.4,
                 "max_tokens": 400,
                 "top_p": 0.9,
@@ -189,7 +189,10 @@ Always produce structured and complete messages.
 
            response_data = res.json()
 
-           bot_reply = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
+           try:
+               bot_reply = response_data["choices"][0]["message"]["content"]
+           except:
+               bot_reply = "⚠️ AI response error. Please try again."
            if not bot_reply:
                bot_reply = "Sorry, I couldn't generate a proper response. Please try again."           
 
@@ -305,6 +308,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
