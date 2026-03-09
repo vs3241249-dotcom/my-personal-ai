@@ -171,9 +171,9 @@ Always produce structured and complete messages.
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "openai/gpt-4o",
+                "model": "meta-llama/llama-3.1-8b-instruct:free",
                 "temperature": 0.3,
-                "max_tokens": 150,
+                "max_tokens": 120,
                 "top_p": 0.9,
                 "messages": messages
             },
@@ -182,13 +182,16 @@ Always produce structured and complete messages.
         print("STATUS:", res.status_code)
         print("RESPONSE:", res.text)
 
-        res.raise_for_status()
-        response_data = res.json()
+        if res.status_code != 200:
+           print("API error:", res.text)
+           bot_reply = "⚠️ AI server busy hai. Thodi der baad try kare."
+        else:
 
-        bot_reply = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
+           response_data = res.json()
 
-        if not bot_reply:
-            bot_reply = "Sorry, I couldn't generate a proper response. Please try again."
+           bot_reply = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
+           if not bot_reply:
+               bot_reply = "Sorry, I couldn't generate a proper response. Please try again."           
 
         save_chat(user_ip, "assistant", bot_reply, username)
 
@@ -302,6 +305,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
