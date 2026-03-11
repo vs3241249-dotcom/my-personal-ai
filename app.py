@@ -171,7 +171,7 @@ Always produce structured and complete messages.
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "meta-llama/llama-3.1-8b-instruct:free",    
+                "model": "deepseek/deepseek-chat:free",    
                 "temperature": 0.4,
                 "max_tokens": 400,
                 "top_p": 0.9,
@@ -308,6 +308,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
