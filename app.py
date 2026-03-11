@@ -171,7 +171,7 @@ Always produce structured and complete messages.
                 "X-Title": "My Personal AI"
             },
             json={
-                "model": "deepseek/deepseek-chat:free",    
+                "model": "openai/gpt-4o-mini",    
                 "temperature": 0.4,
                 "max_tokens": 400,
                 "top_p": 0.9,
@@ -308,6 +308,7 @@ def export_csv():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
