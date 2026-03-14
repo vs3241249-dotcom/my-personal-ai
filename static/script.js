@@ -134,9 +134,10 @@ function renderChat() {
 
   chats[currentChatIndex].messages.forEach((m, idx) => {
     const msg = document.createElement("div");
-    msg.className = "msg " + m.role;
+    msg.className = "message " + (m.role === "assistant" ? "ai" : "user");
 
-  const text = document.createElement("span");
+  const text = document.createElement("div");
+  text.className = "bubble";
 
 if (m.role === "assistant") {
   text.innerHTML = marked.parse(m.text);
@@ -166,9 +167,14 @@ if (m.role === "assistant") {
       toggleMenu(menu, moreBtn);
     };
 
-    msg.appendChild(text);
-    msg.appendChild(moreBtn);
-    msg.appendChild(menu);
+const avatar = document.createElement("div");
+avatar.className = "avatar";
+avatar.textContent = m.role === "assistant" ? "🤖" : "🧑";
+
+msg.appendChild(avatar);
+msg.appendChild(text);
+msg.appendChild(moreBtn);
+msg.appendChild(menu);
     chatDiv.appendChild(msg);
   });
 
@@ -216,12 +222,12 @@ function sendMessage() {
   renderHistory();
 
 const typing = document.createElement("div");
-typing.className = "msg assistant";
+typing.className = "message ai";
 typing.innerHTML = `
-  <span class="typing-text">NovaMind is typing</span>
-  <span class="dots">
-    <span>.</span><span>.</span><span>.</span>
-  </span>
+<div class="avatar">🤖</div>
+<div class="bubble">
+NovaMind is typing<span class="dots">...</span>
+</div>
 `;
 chatDiv.appendChild(typing);
 
