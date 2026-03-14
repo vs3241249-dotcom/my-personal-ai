@@ -230,6 +230,7 @@ NovaMind is typing<span class="dots">...</span>
 </div>
 `;
 chatDiv.appendChild(typing);
+chatDiv.scrollTop = chatDiv.scrollHeight;
 
 fetch("/chat", {
   method: "POST",
